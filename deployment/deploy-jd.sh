@@ -1,5 +1,5 @@
-cd /home/ubuntu/job-hub-api
-git checkout prod 
+cd /home/ubuntu/hardscapes-api
+git checkout jd-prod
 git pull
 npm install
 npm run build
