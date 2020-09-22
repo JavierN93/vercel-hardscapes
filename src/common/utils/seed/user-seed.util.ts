@@ -1,8 +1,9 @@
 import * as Faker from 'faker';
 import { UserRole } from '../../enums/user-role.enum';
+import { globalConfig } from '../../../config';
 
-const mailDomain = 'gmail.com';
-const jobhubDomain = 'jdlandscaping.net';
+const customerMailDomain = 'gmail.com';
+const companyMailDomain = globalConfig.mailDomain;
 const defaultPassword = 'secret';
 
 const defaultAdmins = [
@@ -47,18 +48,18 @@ export function generateContractorAccount(count = 1) {
     const firstName = i < contractors.length ? contractors[i].firstName : Faker.name.firstName();
     const lastName = i < contractors.length ? contractors[i].lastName : Faker.name.lastName();
     const mailName = i < contractors.length ? contractors[i].email : firstName;
-    const email = `contractor${i + 1}.${mailName}@${jobhubDomain}`;
+    const email = `contractor${i + 1}.${mailName}@${companyMailDomain}`;
     ary.push(generateAccount(email, firstName, lastName, Faker.phone.phoneNumber(), UserRole.Contractor));
   }
   return ary;
 }
 
 export function generateSuperAdminAccounts() {
-  return admins.map(admin => generateAccount(`${admin.email}@${jobhubDomain}`, admin.firstName, admin.lastName, Faker.phone.phoneNumber(), UserRole.SuperAdmin));
+  return admins.map(admin => generateAccount(`${admin.email}@${companyMailDomain}`, admin.firstName, admin.lastName, Faker.phone.phoneNumber(), UserRole.SuperAdmin));
 }
 
 export function generateDefaultAdminAccounts() {
-  return defaultAdmins.map(defaultAdmin => generateAccount(`${defaultAdmin.email}@${jobhubDomain}`, defaultAdmin.firstName, defaultAdmin.lastName, Faker.phone.phoneNumber(), UserRole.SuperAdmin));
+  return defaultAdmins.map(defaultAdmin => generateAccount(`${defaultAdmin.email}@${companyMailDomain}`, defaultAdmin.firstName, defaultAdmin.lastName, Faker.phone.phoneNumber(), UserRole.SuperAdmin));
 }
 
 export function generateCustomerAccount(count = 1) {
@@ -67,7 +68,7 @@ export function generateCustomerAccount(count = 1) {
     const firstName = i < customers.length ? customers[i].firstName : Faker.name.firstName();
     const lastName = i < customers.length ? customers[i].lastName : Faker.name.lastName();
     const mailName = i < customers.length ? customers[i].email : firstName;
-    const email = `customer${i + 1}.${mailName}@${mailDomain}`;
+    const email = `customer${i + 1}.${mailName}@${customerMailDomain}`;
     ary.push(generateAccount(email, firstName, lastName, Faker.phone.phoneNumber(), UserRole.Customer));
   }
   return ary;

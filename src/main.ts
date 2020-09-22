@@ -8,6 +8,7 @@ import * as expressBasicAuth from 'express-basic-auth';
 
 import { AppModule } from './app.module';
 import { SeedService } from './seed/seed.service';
+import { globalConfig } from './config';
 
 async function bootstrap() {
   dotenv.config();
@@ -16,7 +17,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
-    origin: process.env.PRODUCTION ? /jdlandscaping\.net$/ : '*',
+    origin: process.env.PRODUCTION ? globalConfig.corsRE : '*',
   });
 
 

@@ -24,6 +24,7 @@ import { EmailEventDto } from './dtos/email-event.dto';
 import { SendGridEmailStatusDto } from './dtos/send-grid-email-status.dto';
 import { EmailEventType } from './enums';
 import { MilestoneType } from '../payment/enums';
+import { globalConfig } from '../config';
 
 @Injectable()
 export class EmailService {
@@ -158,7 +159,7 @@ export class EmailService {
       messageContent: pendingMessage.message,
       loginLink: `${process.env.PRODUCTION_HOST}/login`,
       replyLink: `mailto:${fromEmail}`,
-    }, null, `J & D Landscaping <${fromEmail}>`);
+    }, null, `${globalConfig.companyName} <${fromEmail}>`);
   }
 
   async sendConsultationEmail(user: User): Promise<boolean> {
@@ -433,7 +434,7 @@ export class EmailService {
     const subject = replaceTagsOnMailString(EmailTemplateSubjects[code], substitutes);
     const html = replaceTagsOnMailString(emailTemplate(code), substitutes);
     const clientResponse = await this.sendGrid.send({
-      from: from || `J & D Landscaping <support@${process.env.MAIL_DOMAIN}>`,
+      from: from || `${globalConfig.companyName} <support@${process.env.MAIL_DOMAIN}>`,
       to: recipient,
       subject,
       html,

@@ -124,7 +124,7 @@
                 <!-- Logo -->
                 <tr>
                     <td align="left">
-                        <img src="https://jdlandscaping-assets.s3.amazonaws.com/emails/logo.png" width="120"
+                        <img alt="logo" src="{{mailAssetsRoot}}/logo.png" width="120"
                              style="-ms-interpolation-mode: bicubic;border: 0;height: auto;line-height: 100%;outline: none;text-decoration: none;">
                     </td>
                 </tr>
@@ -132,7 +132,7 @@
                 <!-- Title -->
                 <tr>
                     <td style="font-size: 1.5rem; font-weight: 900; line-height: 1.875rem; color: #3e3e3e; padding-top: 40px; padding-bottom: 40px;">
-                        J & D Landscaping<br>has provided new Pick Pavers date.
+                        {{companyName}}<br>has provided new Pick Pavers date.
                     </td>
                 </tr>
 
@@ -145,7 +145,7 @@
                                     <div>
                                         <p style="padding-bottom: 12px;">Hi <span
                                                 style="color: #07a39d;">{{name}},</span></p>
-                                        <p style="padding-bottom: 12px;">J & D Landscaping provided a new date for the
+                                        <p style="padding-bottom: 12px;">{{companyName}} provided a new date for the
                                             Pick Pavers process on you project.</p>
                                     </div>
                                 </td>
@@ -160,7 +160,7 @@
                             <tr>
                                 <td style="padding-top: 20px; padding-bottom: 20px;">
                                     <p>If you have any questions please reach out to your project consultant or login to
-                                        message J & D Landscaping.</p>
+                                        message {{companyName}}.</p>
                                 </td>
                             </tr>
                         </table>
@@ -173,11 +173,11 @@
     <tr>
         <td align="center" class="social" valign="top"
             style="-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;mso-table-lspace: 0pt;mso-table-rspace: 0pt; padding-bottom: 30px; padding-top: 40px;">
-            <a href="https://www.facebook.com/JDLandscapingLLC/" style="margin-right: 3px;"><img width="21"
-                                                                                                 src="https://assets.jdlandscaping.net/emails/facebook.png"
+            <a href="{{companyFacebookLink}}" style="margin-right: 3px;"><img width="21"
+                                                                                                 src="{{mailAssetsRoot}}/facebook.png"
                                                                                                  alt="facebook"></a>
-            <a href="https://www.instagram.com/jdlandscapingllc/" style="margin-right: 3px;"><img width="21"
-                                                                                                  src="https://assets.jdlandscaping.net/emails/instagram.png"
+            <a href="{{companyInstagramLink}}" style="margin-right: 3px;"><img width="21"
+                                                                                                  src="{{mailAssetsRoot}}/instagram.png"
                                                                                                   alt="instagram"></a>
         </td>
     </tr>
@@ -185,8 +185,8 @@
     <tr>
         <td align="center" class="unsubscribe"
             style="color: #666666; font-size: 10px; line-height: 16px; padding-bottom: 30px;">
-            Sent from J & D Landscaping<br>
-            J & D Landscaping LLC, 123 South Main St., East Windsor, CT 06088<br>
+            {{companyName}}<br>
+            {{companyName}} {{companyType}}, {{companyAddress}}<br>
             <a href="{{unsubscribeLink}}" style="color: #666666; text-decoration: underline;">Unsubscribe</a>
         </td>
     </tr>
