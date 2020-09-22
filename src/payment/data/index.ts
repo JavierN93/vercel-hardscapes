@@ -2,7 +2,7 @@ export const milestonePlan = [
   {
     rate: 0.1,
     name: 'Deposit',
-    comment: 'Down payment to move forward with the project and reserve a start date with contractor.',
+    comment: 'Down payment to move forward with the project and reserve a start date with consultant.',
   },
   {
     rate: 0.4,
@@ -12,6 +12,6 @@ export const milestonePlan = [
   {
     rate: 0.5,
     name: 'Project Completed',
-    comment: 'Upon completion of project, when the project is complete conduct a final walk through with contractor and make finale payment.',
+    comment: 'Upon completion of project, when the project is complete conduct a final walk through with consultant and make finale payment.',
   },
 ];

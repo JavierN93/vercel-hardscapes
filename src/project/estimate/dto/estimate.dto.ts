@@ -68,7 +68,7 @@ export class EstimateDto {
 
   @ApiProperty({ required: true })
   @IsUUID()
-  contractorUserId: string;
+  consultantUserId: string;
 
   @ApiProperty({ enum: EstimateStatus, required: false })
   status?: EstimateStatus;

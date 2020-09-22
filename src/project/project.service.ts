@@ -37,12 +37,14 @@ import { MilestoneType, PaymentMethod } from '../payment/enums';
 import { mergeArray } from '../common/utils/array.util';
 import { getFromDto } from '../common/utils/repository.util';
 import { SortByDateType } from '../common/enums/query.enum';
+import { SubContract } from './sub-contract/entities/sub-contract.entity';
 
 @Injectable()
 export class ProjectService {
 
   constructor(
     @InjectRepository(Project) private readonly projectsRepository: Repository<Project>,
+    @InjectRepository(SubContract) private readonly subContractsRepository: Repository<SubContract>,
     @InjectRepository(ImageAttachment) private readonly imageAttachmentsRepository: Repository<ImageAttachment>,
     @InjectRepository(ProjectAccessory) private readonly projectAccessoriesRepository: Repository<ProjectAccessory>,
     @InjectRepository(Schedule) private scheduleRepository: Repository<Schedule>,
@@ -51,6 +53,7 @@ export class ProjectService {
     @InjectRepository(FinalProposal) private finalProposalRepository: Repository<FinalProposal>,
     @InjectRepository(PaymentAddOn) private paymentAddOnRepository: Repository<PaymentAddOn>,
     @InjectRepository(Refund) private refundRepository: Repository<Refund>,
+    @InjectRepository(SubContract) private subContractRepository: Repository<SubContract>,
   ) {
   }
 
@@ -224,7 +227,7 @@ export class ProjectService {
     return this.projectAccessoriesRepository.save(accessories);
   }
 
-  async findProjects(contractorId: string, sortByDateType: SortByDateType, status: ProjectStatusFilterType, projectType: ProjectAccessoryType, skip: number, take: number): Promise<[Project[], number]> {
+  async findProjects(consultantId: string, sortByDateType: SortByDateType, status: ProjectStatusFilterType, projectType: ProjectAccessoryType, skip: number, take: number): Promise<[Project[], number]> {
     let statusFilter = 'TRUE';
     if (status === ProjectStatusFilterType.EstimatePending) {
       statusFilter = 'project.estimate is null';
@@ -239,13 +242,13 @@ export class ProjectService {
       .leftJoinAndSelect('project.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'user')
       .leftJoinAndSelect('user.patioPackage', 'patioPackage')
-      .leftJoinAndSelect('project.contractor', 'contractor')
-      .leftJoinAndSelect('contractor.user', 'contractor.user')
+      .leftJoinAndSelect('project.consultant', 'consultant')
+      .leftJoinAndSelect('consultant.user', 'consultant.user')
       .leftJoinAndSelect('project.estimate', 'estimate')
       .leftJoinAndSelect('estimate.siteVisitSchedules', 'siteVisitSchedules')
       .leftJoinAndSelect('project.finalProposal', 'finalProposal')
       .leftJoinAndSelect('project.milestones', 'milestones')
-      .where(contractorId ? `contractor.id = '${contractorId}'` : '')
+      .where(consultantId ? `consultant.id = '${consultantId}'` : '')
       .andWhere(statusFilter)
       .andWhere(projectType ? 'project.projectType = :projectType' : 'TRUE', { projectType })
       .addOrderBy('project.createdAt', sortByDateType === SortByDateType.MostRecent ? 'DESC' : 'ASC')
@@ -269,15 +272,20 @@ export class ProjectService {
     return new SuccessResponse(Boolean(updateResult.affected));
   }
 
+  saveSubContract(subContract: SubContract): Promise<SubContract> {
+    return this.subContractsRepository.save(subContract);
+  }
+
   async findProjectById(id: string, user?: any): Promise<Project> {
     const project = await this.projectsRepository.findOne({
       relations: [
         'customer',
         'customer.user',
         'customer.user.patioPackage',
-        'contractor',
-        'contractor.user',
+        'consultant',
+        'consultant.user',
         'attachments',
+        'siteVisit',
         'accessories',
         'estimate',
         'estimate.siteVisitSchedules',
@@ -286,6 +294,9 @@ export class ProjectService {
         'refund',
         'milestones.paymentAddOns',
         'pickOutPaverSchedule',
+        'subContracts',
+        'subContracts.contractor',
+        'subContracts.contractor.user',
       ],
       where: {
         id,
@@ -297,8 +308,8 @@ export class ProjectService {
     project.attachments = project.attachments.filter(a => !Boolean(a.deletedAt));
     project.accessories = project.accessories.filter(a => !Boolean(a.deletedAt));
     project.user = project.customer.user;
-    if (project.contractor) {
-      project.assignedContractor = project.contractor.user;
+    if (project.consultant) {
+      project.assignedConsultant = project.consultant.user;
     }
     if (project.milestones && project.milestones.length) {
       const finalMilestone = project.milestones.find(m => m.order === MilestoneType.Final);
@@ -316,7 +327,7 @@ export class ProjectService {
       if (project.customer.user.id === user.id) {
         return project;
       }
-      if (project.contractor && project.contractor.user.id === user.id) {
+      if (project.consultant && project.consultant.user.id === user.id) {
         return project;
       }
       throw new BadRequestException('The project requested does not belong to you.');
@@ -404,18 +415,18 @@ export class ProjectService {
     return [projects, count];
   }
 
-  async findProjectsByContractorId(id: string, skip: number, take: number): Promise<[Project[], number]> {
+  async findProjectsByConsultantId(id: string, skip: number, take: number): Promise<[Project[], number]> {
     const [projects, count] = await this.projectsRepository.createQueryBuilder('project')
       .leftJoinAndSelect('project.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'user')
       .leftJoinAndSelect('user.patioPackage', 'patioPackage')
-      .leftJoinAndSelect('project.contractor', 'contractor')
-      .leftJoinAndSelect('contractor.user', 'contractor.user')
+      .leftJoinAndSelect('project.consultant', 'consultant')
+      .leftJoinAndSelect('consultant.user', 'consultant.user')
       .leftJoinAndSelect('project.estimate', 'estimate')
       .leftJoinAndSelect('estimate.siteVisitSchedules', 'estimate.siteVisitSchedules')
       .leftJoinAndSelect('project.finalProposal', 'finalProposal')
       .leftJoinAndSelect('project.milestones', 'milestones')
-      .where('contractor.id = :id', { id })
+      .where('consultant.id = :id', { id })
       .addOrderBy('project.createdAt', 'DESC')
       .skip(skip)
       .take(take)
@@ -427,8 +438,8 @@ export class ProjectService {
     return this.projectsRepository.createQueryBuilder('project')
       .leftJoinAndSelect('project.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'customer.user')
-      .leftJoinAndSelect('project.contractor', 'contractor')
-      .leftJoinAndSelect('contractor.user', 'contractor.user')
+      .leftJoinAndSelect('project.consultant', 'consultant')
+      .leftJoinAndSelect('consultant.user', 'consultant.user')
       .leftJoinAndSelect('project.estimate', 'estimate')
       .leftJoinAndSelect('project.finalProposal', 'finalProposal')
       .leftJoinAndSelect('project.milestones', 'milestones')
@@ -442,8 +453,8 @@ export class ProjectService {
 
   async getEstimatePendingProjects(): Promise<Project[]> {
     return this.projectsRepository.createQueryBuilder('project')
-      .leftJoinAndSelect('project.contractor', 'contractor')
-      .leftJoinAndSelect('contractor.user', 'contractor.user')
+      .leftJoinAndSelect('project.consultant', 'consultant')
+      .leftJoinAndSelect('consultant.user', 'consultant.user')
       .leftJoinAndSelect('project.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'customer.user')
       .leftJoinAndSelect('project.estimate', 'estimate')
@@ -639,5 +650,20 @@ export class ProjectService {
         longitude: Not(IsNull()),
       },
     });
+  }
+
+  findSubContractByProjectId(id: string): Promise<SubContract> {
+    return this.subContractRepository.createQueryBuilder('sub_contract')
+      .leftJoinAndSelect('sub_contract.project', 'project')
+      .leftJoinAndSelect('sub_contract.sitePlan', 'sitePlan')
+      .where('project.id = :id', { id })
+      .getOne();
+  }
+
+  async addSubContract(projectId: string): Promise<SubContract> {
+    const project = await this.findProjectById(projectId);
+    const subContract = new SubContract();
+    subContract.project = project;
+    return this.subContractRepository.save(subContract);
   }
 }

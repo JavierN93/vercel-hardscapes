@@ -36,11 +36,11 @@ export class ContractController {
       throw new BadRequestException('This project does not belong to you.');
     }
     const admins = await this.userService.findSuperAdmins();
-    const contractor = project.contractor.user;
+    const consultant = project.consultant.user;
     project.contractSignedDate = new Date();
     await this.projectService.saveProject(project);
-    await this.notificationService.customerSignedContractEvent(admins.find(a => a.id === contractor.id) ? admins : [...admins, contractor], project);
-    const emailRecipients = admins.find(a => a.id === contractor.id) ? admins : [...admins, contractor];
+    await this.notificationService.customerSignedContractEvent(admins.find(a => a.id === consultant.id) ? admins : [...admins, consultant], project);
+    const emailRecipients = admins.find(a => a.id === consultant.id) ? admins : [...admins, consultant];
     await Promise.all(emailRecipients.map(async user => {
       return this.emailService.sendContractSignedEmail(user, project);
     }));

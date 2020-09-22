@@ -7,6 +7,7 @@ import { FinalProposal } from '../final-proposal/entities/final-proposal.entity'
 import { Estimate } from '../estimate/entities/estimate.entity';
 import { ImageAttachmentDto } from '../dtos/image-attachment.dto';
 import { AccessoryLayout } from '../final-proposal/entities/accessory-layout.entity';
+import { Portfolio } from '../../portfolio/entities/portfolio.entity';
 
 @Entity('image_attachment')
 export class ImageAttachment extends SoftDelete {
@@ -22,6 +23,9 @@ export class ImageAttachment extends SoftDelete {
 
   @ManyToOne(() => AccessoryLayout, layout => layout.attachments)
   accessoryLayout: AccessoryLayout;
+
+  @ManyToOne(() => Portfolio, portfolio => portfolio.attachments)
+  portfolio: Portfolio;
 
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')

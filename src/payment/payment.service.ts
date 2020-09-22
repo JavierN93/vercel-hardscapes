@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import * as Plaid from 'plaid';
 
-import { Project } from '../project/entities/project.entity';
 import { Milestone } from '../project/entities/milestone.entity';
 import { PaymentAddOn } from './entities/payment-add-on.entity';
 
@@ -50,6 +49,15 @@ export class PaymentService {
     this.initStripe();
     const customer = await this.stripe.customers.create({ name, email });
     return customer.id;
+  }
+
+  createStripeEvent(signature: string, requestBody: any): any {
+    this.initStripe();
+    return this.stripe.webhooks.constructEvent(
+      requestBody,
+      signature,
+      process.env.STRIPE_WEB_HOOK_SECRET,
+    );
   }
 
   createPaymentEvent(signature: string, requestBody: any): [string, string] {
@@ -106,6 +114,65 @@ export class PaymentService {
     }
   }
 
+  async createPaymentToConnectedAccount(accountId: string, amountUsd: number): Promise<string> {
+    this.initStripe();
+    try {
+      const paymentIntent = await this.stripe.paymentIntents.create({
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        payment_method_types: ['card'],
+        amount: amountUsd * 100,
+        currency: 'usd',
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        application_fee_amount: 0,
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        transfer_data: {
+          destination: accountId,
+        },
+      });
+      return paymentIntent.id;
+    } catch (e) {
+      throw new BadRequestException('The account is not ready to get paid.');
+    }
+  }
+
+  async createStripeAccount(email: string): Promise<string> {
+    this.initStripe();
+    const account = await this.stripe.accounts.create({
+      type: 'custom',
+      country: 'US',
+      email: email,
+      capabilities: {
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+    });
+    return account.id;
+  }
+
+  validateStripeAccount(account: any): boolean {
+    return account.charges_enabled && account.payouts_enabled;
+  }
+
+  async stripeAccountLink(accountId: string): Promise<string> {
+    this.initStripe();
+    const accountLinks = await this.stripe.accountLinks.create({
+      account: accountId,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      failure_url: `${process.env['PRODUCTION_HOST']}/redirect/setup-stripe-account`,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      success_url: `${process.env['PRODUCTION_HOST']}/contractor/onboarding/payment-setup`,
+      type: 'account_onboarding',
+      collect: 'eventually_due',
+    });
+    return accountLinks.url;
+  }
+
+  addOnAmountFromMilestone(milestone: Milestone): number {
+    const addOnReducer = (sum, addOn: PaymentAddOn) => sum + addOn.amount;
+    return milestone.paymentAddOns.reduce(addOnReducer, 0);
+  }
+
   private initStripe() {
     if (!this.stripe) {
       this.stripe = new Stripe(process.env.STRIPE_SK, {
@@ -121,15 +188,5 @@ export class PaymentService {
         process.env.SANDBOX_MODE ? Plaid.environments.sandbox : Plaid.environments.production,
       );
     }
-  }
-
-  addOnAmountFromMilestone(milestone: Milestone): number {
-    const addOnReducer = (sum, addOn: PaymentAddOn) => sum + addOn.amount;
-    return milestone.paymentAddOns.reduce(addOnReducer, 0);
-  }
-
-  addOnAmountFromProject(project: Project): number {
-    const addOnReducer = (sum, milestone: Milestone) => sum + this.addOnAmountFromMilestone(milestone);
-    return project.milestones.reduce(addOnReducer, 0);
   }
 }

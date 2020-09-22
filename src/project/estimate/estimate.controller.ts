@@ -57,8 +57,8 @@ export class EstimateController {
   async requestSiteVisitChange(@Param('id') id: string): Promise<SuccessResponse> {
     const project = await this.projectService.findProjectById(id);
     const admins = await this.usersService.findSuperAdmins();
-    const contractor = project.contractor.user;
-    const recipients = admins.find(a => a.id === contractor.id) ? admins : [...admins, contractor];
+    const consultant = project.consultant.user;
+    const recipients = admins.find(a => a.id === consultant.id) ? admins : [...admins, consultant];
     await this.notificationService.customerRequestedSiteVisitChangeEvent(recipients, project);
     await Promise.all(recipients.map(r => this.emailService.sendSiteVisitScheduleChangeRequestEmail(r, project)));
     return new SuccessResponse(true);
@@ -69,7 +69,7 @@ export class EstimateController {
   @ApiOkResponse({ type: Project })
   async skipEstimate(@Param('id') id: string, @Body() body: SkipEstimateDto): Promise<Project> {
     const project = await this.projectService.findProjectById(id);
-    const contractorProfile = await this.usersService.findContractorProfileByUserId(body.contractorUserId);
+    const consultantProfile = await this.usersService.findConsultantProfileByUserId(body.consultantUserId);
     const estimateDto = this.estimateService.getEmptyEstimateDtoFromProject(project);
     estimateDto.costUnit = CostUnit.Total;
     estimateDto.pricePerUnit = 0;
@@ -82,7 +82,7 @@ export class EstimateController {
     schedule.to = body.siteVisitDateTo;
     estimateDto.siteVisitSchedules = [schedule];
     estimateDto.status = EstimateStatus.SiteVisitScheduled;
-    await this.estimateService.saveEstimate(project, estimateDto, contractorProfile);
+    await this.estimateService.saveEstimate(project, estimateDto, consultantProfile);
     return this.projectService.findProjectById(id);
   }
 
@@ -106,17 +106,17 @@ export class EstimateController {
   async updateEstimate(@Param('id') id: string, @Body() body: EstimateDto): Promise<EstimateDto> {
     const project = await this.projectService.findProjectById(id);
     const estimate = await this.estimateService.findEstimateFromProjectId(id);
-    const contractorProfile = await this.usersService.findContractorProfileByUserId(body.contractorUserId);
+    const consultantProfile = await this.usersService.findConsultantProfileByUserId(body.consultantUserId);
     let result;
     if (!body.requestDetails) {
       delete body.requestDetails;
     }
     if (!estimate) {
-      result = await this.estimateService.saveEstimate(project, body, contractorProfile);
+      result = await this.estimateService.saveEstimate(project, body, consultantProfile);
       await this.emailService.sendEstimateReadyEmail(project);
     } else {
       body.id = estimate.id;
-      result = await this.estimateService.saveEstimate(project, body, contractorProfile);
+      result = await this.estimateService.saveEstimate(project, body, consultantProfile);
       await this.emailService.sendEstimateUpdatedEmail(project);
     }
     await this.notificationService.estimateUpdatedEvent(project.customer.user, result);
@@ -140,7 +140,7 @@ export class EstimateController {
 
   @ApiBearerAuth()
   @UseGuards(RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Post(':id/continue-to-proposal')
   @ApiOkResponse({ type: Estimate })
   async continueToProposal(@Request() request, @Param('id') id: string): Promise<Estimate> {
@@ -174,8 +174,8 @@ export class EstimateController {
       }
       await this.estimateService.updateEstimate(estimate);
       const admins = await this.usersService.findSuperAdmins();
-      const contractor = project.contractor ? project.contractor.user : null;
-      await this.notificationService.estimateStatusChangedEvent(admins.find(a => a.id === contractor.id) ? admins : [...admins, contractor], estimate);
+      const consultant = project.consultant ? project.consultant.user : null;
+      await this.notificationService.estimateStatusChangedEvent(admins.find(a => a.id === consultant.id) ? admins : [...admins, consultant], estimate);
       return this.estimateService.findEstimateFromProjectId(projectId);
     } else if (estimate.status === status) {
       return this.estimateService.findEstimateFromProjectId(projectId);

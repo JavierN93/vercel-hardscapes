@@ -22,7 +22,7 @@ import { DateRangeDto } from '../common/dtos/date-range.dto';
 @ApiTags('Overview')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles([UserRole.Contractor, UserRole.SuperAdmin])
+@Roles([UserRole.Consultant, UserRole.SuperAdmin])
 @Controller('api/overview')
 export class OverviewController {
 
@@ -74,7 +74,7 @@ export class OverviewController {
 
   @Get('revenue/by-date')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.SuperAdmin, UserRole.Contractor])
+  @Roles([UserRole.SuperAdmin, UserRole.Consultant])
   @ApiOkResponse({ type: () => PaymentByDateDto, isArray: true })
   async getPaymentHistory(@Query() query: ReportFilterDto): Promise<PaymentByDateDto[]> {
     return this.projectService.getPaymentHistory(query);
@@ -82,7 +82,7 @@ export class OverviewController {
 
   @Get('revenue/by-type')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.SuperAdmin, UserRole.Contractor])
+  @Roles([UserRole.SuperAdmin, UserRole.Consultant])
   @ApiOkResponse({ type: () => PaymentDto })
   async getPaymentByType(@Query() query: DateRangeDto): Promise<PaymentDto> {
     return this.projectService.getPaymentByType(query);

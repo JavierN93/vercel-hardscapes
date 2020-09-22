@@ -7,9 +7,9 @@ import { SocketService } from '../socket/socket.service';
 import { Project } from '../project/entities/project.entity';
 import { Event } from '../event/entities/event.entity';
 import {
-  ContractorConfirmedCashPaymentEvent,
-  ContractorRequestedReviewEvent,
-  ContractorRequestedToReleaseMilestoneEvent,
+  ConsultantConfirmedCashPaymentEvent,
+  ConsultantRequestedReviewEvent,
+  ConsultantRequestedToReleaseMilestoneEvent,
   ContractReadyEvent,
   CustomerCanceledSiteVisitEvent,
   CustomerReleasedMilestoneEvent,
@@ -27,11 +27,26 @@ import {
   SiteVisitScheduleUpdatedEvent,
   PickOutPaversScheduleUpdatedEvent,
   CustomerRequestedPickOutPaversScheduleChangeEvent,
+  ContractorProfileUpdatedEvent,
+  AdminApprovedBasicProfileEvent,
+  AdminDeclinedOnboardingContractorEvent,
+  ContractorSignedLegalTermsEvent,
+  ContractorFinishedSettingUpStripeAccountEvent,
+  ConsultantInvitedContractorToProjectEvent,
+  ContractorAcceptedProjectEvent,
+  ContractorDeclinedProjectEvent,
+  ContractorFinishedProjectEvent,
+  ContractorRequestedMilestoneReleaseEvent,
+  AdminPaidSubContractMilestoneEvent,
+  ContractorSetupPaymentEvent,
+  SitePlanUpdatedEvent,
+  ConsultantRequestedMilestoneReleaseEvent,
 } from '../event/dtos/add-event.dto';
 import { Estimate } from '../project/estimate/entities/estimate.entity';
 import { User } from '../users/entities/user.entity';
 import { FinalProposal } from '../project/final-proposal/entities/final-proposal.entity';
 import { Milestone } from '../project/entities/milestone.entity';
+import { SubContract } from '../project/sub-contract/entities/sub-contract.entity';
 
 @Injectable()
 export class NotificationService {
@@ -119,22 +134,22 @@ export class NotificationService {
     }));
   }
 
-  async contractorRequestedToReleaseMilestoneEvent(user: User, milestone: Milestone): Promise<Event> {
-    const payload = new ContractorRequestedToReleaseMilestoneEvent(user, milestone);
+  async consultantRequestedToReleaseMilestoneEvent(user: User, milestone: Milestone): Promise<Event> {
+    const payload = new ConsultantRequestedToReleaseMilestoneEvent(user, milestone);
     const event: Event = await this.eventService.addEvent(payload);
     this.socketService.event$.next(event);
     return event;
   }
 
-  async contractorConfirmedCashPaymentEvent(user: User, milestone: Milestone): Promise<Event> {
-    const payload = new ContractorConfirmedCashPaymentEvent(user, milestone);
+  async consultantConfirmedCashPaymentEvent(user: User, milestone: Milestone): Promise<Event> {
+    const payload = new ConsultantConfirmedCashPaymentEvent(user, milestone);
     const event: Event = await this.eventService.addEvent(payload);
     this.socketService.event$.next(event);
     return event;
   }
 
-  async contractorRequestedReviewEvent(user: User, project: Project): Promise<Event> {
-    const payload = new ContractorRequestedReviewEvent(user, project);
+  async consultantRequestedReviewEvent(user: User, project: Project): Promise<Event> {
+    const payload = new ConsultantRequestedReviewEvent(user, project);
     const event: Event = await this.eventService.addEvent(payload);
     this.socketService.event$.next(event);
     return event;
@@ -213,5 +228,121 @@ export class NotificationService {
       this.socketService.event$.next(event);
       return event;
     }));
+  }
+
+  contractorUpdatedProfileEvent(users: User[], contractorUser: User): Promise<Event[]> {
+    return Promise.all(users.map(async user => {
+      const payload = new ContractorProfileUpdatedEvent(user, contractorUser);
+      const event = await this.eventService.addEvent(payload);
+      this.socketService.event$.next(event);
+      return event;
+    }));
+  }
+
+  async adminApprovedBasicProfileEvent(user: User): Promise<Event> {
+    const payload = new AdminApprovedBasicProfileEvent(user);
+    const event = await this.eventService.addEvent(payload);
+    this.socketService.event$.next(event);
+    return event;
+  }
+
+  async adminDeclinedOnboardingContractorEvent(user: User): Promise<Event> {
+    const payload = new AdminDeclinedOnboardingContractorEvent(user);
+    const event = await this.eventService.addEvent(payload);
+    this.socketService.event$.next(event);
+    return event;
+  }
+
+  contractorSignedLegalTermsEvent(users: User[], contractorUser: User): Promise<Event[]> {
+    return Promise.all(users.map(async user => {
+      const payload = new ContractorSignedLegalTermsEvent(user, contractorUser);
+      const event = await this.eventService.addEvent(payload);
+      this.socketService.event$.next(event);
+      return event;
+    }));
+  }
+
+  contractorSetupPaymentEvent(users: User[], contractorUser: User): Promise<Event[]> {
+    return Promise.all(users.map(async user => {
+      const payload = new ContractorSetupPaymentEvent(user, contractorUser);
+      const event = await this.eventService.addEvent(payload);
+      this.socketService.event$.next(event);
+      return event;
+    }));
+  }
+
+  contractorFinishedSettingUpStripeAccountEvent(users: User[], contractorUser: User): Promise<Event[]> {
+    return Promise.all(users.map(async user => {
+      const payload = new ContractorFinishedSettingUpStripeAccountEvent(user, contractorUser);
+      const event = await this.eventService.addEvent(payload);
+      this.socketService.event$.next(event);
+      return event;
+    }));
+  }
+
+  async consultantInvitedContractorToProjectEvent(user: User, project: Project): Promise<Event> {
+    const payload = new ConsultantInvitedContractorToProjectEvent(user, project);
+    const event = await this.eventService.addEvent(payload);
+    this.socketService.event$.next(event);
+    return event;
+  }
+
+  async sitePlanUpdatedEvent(user: User, project: Project): Promise<Event> {
+    const payload = new SitePlanUpdatedEvent(user, project);
+    const event = await this.eventService.addEvent(payload);
+    this.socketService.event$.next(event);
+    return event;
+  }
+
+  contractorAcceptedProjectEvent(users: User[], contractorUser: User, project: Project, subContract: SubContract): Promise<Event[]> {
+    return Promise.all(users.map(async user => {
+      const payload = new ContractorAcceptedProjectEvent(user, contractorUser, project, subContract);
+      const event = await this.eventService.addEvent(payload);
+      this.socketService.event$.next(event);
+      return event;
+    }));
+  }
+
+  contractorDeclinedProjectEvent(users: User[], contractorUser: User, project: Project, subContract: SubContract): Promise<Event[]> {
+    return Promise.all(users.map(async user => {
+      const payload = new ContractorDeclinedProjectEvent(user, contractorUser, project, subContract);
+      const event = await this.eventService.addEvent(payload);
+      this.socketService.event$.next(event);
+      return event;
+    }));
+  }
+
+  contractorFinishedProjectEvent(users: User[], contractorUser: User, project: Project, subContract: SubContract): Promise<Event[]> {
+    return Promise.all(users.map(async user => {
+      const payload = new ContractorFinishedProjectEvent(user, contractorUser, project, subContract);
+      const event = await this.eventService.addEvent(payload);
+      this.socketService.event$.next(event);
+      return event;
+    }));
+  }
+
+  contractorRequestedMilestoneReleaseEvent(users: User[], contractorUser: User, project: Project, subContract: SubContract): Promise<Event[]> {
+    return Promise.all(users.map(async user => {
+      const payload = new ContractorRequestedMilestoneReleaseEvent(user, contractorUser, project, subContract);
+      const event = await this.eventService.addEvent(payload);
+      this.socketService.event$.next(event);
+      return event;
+    }));
+  }
+
+  consultantRequestedMilestoneReleaseEvent(users: User[], consultantUser: User, project: Project, subContract: SubContract): Promise<Event[]> {
+    return Promise.all(users.map(async user => {
+      const payload = new ConsultantRequestedMilestoneReleaseEvent(user, project, subContract);
+      const event = await this.eventService.addEvent(payload);
+      this.socketService.event$.next(event);
+      return event;
+    }));
+  }
+
+  async adminPaidSubContractMilestoneEvent(user: User, project: Project): Promise<Event> {
+    const payload = new AdminPaidSubContractMilestoneEvent(user, project);
+    const event = await this.eventService.addEvent(payload);
+    this.socketService.event$.next(event);
+    return event;
   }
 }

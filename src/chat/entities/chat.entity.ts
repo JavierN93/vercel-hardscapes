@@ -16,8 +16,8 @@ export class Chat extends SoftDelete {
   @OneToMany(() => Message, message => message.chat)
   messages: Message[];
 
-  @ApiProperty({type: User, required: false})
-  contractor?: User;
+  @ApiProperty({ type: User, required: false })
+  consultant?: User;
 
   @ApiProperty({type: User, required: false})
   customer?: User;
@@ -31,11 +31,11 @@ export class Chat extends SoftDelete {
       project: {
         id: this.project.id,
         name: this.project.name,
-        projectType: this.project.projectType
+        projectType: this.project.projectType,
       },
       customer: this.project.customer.user.toUserDto(),
-      contractor: this.project.contractor.user.toUserDto(),
-      unread: this.unread
+      consultant: this.project.consultant.user.toUserDto(),
+      unread: this.unread,
     }
   }
 }

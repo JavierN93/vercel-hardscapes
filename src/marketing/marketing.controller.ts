@@ -34,7 +34,7 @@ export class MarketingController {
   @Get('page-visit')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: PageVisitHistoryOverviewDto, isArray: true })
   getPageVisitHistory(): Promise<PageVisitHistoryOverviewDto[]> {
     return this.marketingService.getPageVisitHistory();
@@ -43,7 +43,7 @@ export class MarketingController {
   @Get('session-count')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: SessionCountDto, isArray: true })
   getOverallTrafficHistory(@Query() query: ReportFilterDto): Promise<SessionCountDto[]> {
     query.unit = query.unit || TimeUnit.Hour;
@@ -53,7 +53,7 @@ export class MarketingController {
   @Get('projects')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: ProjectBriefLocationDto, isArray: true })
   async getProjects(): Promise<ProjectBriefLocationDto[]> {
     const projects = await this.projectService.findProjectsWithValidAddress();

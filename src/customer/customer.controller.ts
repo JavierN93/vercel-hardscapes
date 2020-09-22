@@ -71,7 +71,7 @@ export class CustomerController {
   @ApiBearerAuth()
   @Post('invite')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: SuccessResponse })
   async invite(@Body() body: RegisterCustomerDto): Promise<any> {
     return this.registerCustomer(body, true);
@@ -80,7 +80,7 @@ export class CustomerController {
   @ApiBearerAuth()
   @Post(':id/send-invitation')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: SuccessResponse })
   async sendInvitation(@Param('id') id: string) {
     const user = await this.usersService.findUserById(id);
@@ -101,7 +101,7 @@ export class CustomerController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Get(':id/contracts')
   @ApiImplicitParam({ name: 'id', required: true })
   @ApiOkResponse({ type: () => Project, isArray: true })
@@ -113,7 +113,7 @@ export class CustomerController {
   @ApiBearerAuth()
   @Get('all')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: CustomerDto, isArray: true })
   async customers(@Query() query: PaginationDto): Promise<PaginatorDto<CustomerDto>> {
     const [data, count] = await this.usersService.findCustomers(query.skip || 0, query.take || customerDefaultTakeCount);
@@ -123,7 +123,7 @@ export class CustomerController {
   @ApiBearerAuth()
   @Get(':id/projects')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: () => PaginatorDto })
   async projects(@Param('id') id: string, @Query() query: PaginationDto): Promise<PaginatorDto<Project>> {
     const [data, count] = await this.projectService.findProjectsByUserId(id, query.skip || 0, query.take || projectDefaultTakeCount);
@@ -137,7 +137,7 @@ export class CustomerController {
   @ApiBearerAuth()
   @Post('search-by-email')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: () => User })
   async findCustomerByEmail(@Body() body: SearchByEmailDto): Promise<User> {
     const user = await this.usersService.findUserByEmail(body.email);
@@ -150,7 +150,7 @@ export class CustomerController {
   @ApiBearerAuth()
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: CustomerDto, isArray: true })
   async customer(@Param('id') id: string): Promise<CustomerDto> {
     return this.usersService.findCustomerById(id);
@@ -184,10 +184,10 @@ export class CustomerController {
       try {
         this.emailService.sendVerificationEmail(user).catch(err => console.log(err));
         this.slackService.sendNotification(SlackMessageType.NewUserRegistered, user).catch(err => console.log(err));
-        const contractors = await this.usersService.findContractors();
+        const consultants = await this.usersService.findConsultants();
         // set invitation email sent when a customer is self registered
         await this.usersService.setInvitationStatus(user, InvitationStatus.Accepted);
-        await this.notificationService.userRegisteredEvent(contractors, user);
+        await this.notificationService.userRegisteredEvent(consultants, user);
       } catch (e) {
         console.log(e);
       }

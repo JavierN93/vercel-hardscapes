@@ -24,8 +24,8 @@ export class ChatDto {
   @ApiProperty({type: UserDto})
   readonly customer: UserDto;
 
-  @ApiProperty({type: UserDto})
-  readonly contractor: UserDto;
+  @ApiProperty({ type: UserDto })
+  readonly consultant: UserDto;
 
   @ApiProperty()
   readonly unread: number;

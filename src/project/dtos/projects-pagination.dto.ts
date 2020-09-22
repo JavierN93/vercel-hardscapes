@@ -6,7 +6,7 @@ import { SortByDateType } from '../../common/enums/query.enum';
 
 export class ProjectsPaginationDto extends PaginationDto {
   @ApiProperty({ required: false })
-  contractorId: string;
+  consultantId: string;
 
   @ApiProperty({ enum: SortByDateType, required: false })
   projectSortByDate: SortByDateType;

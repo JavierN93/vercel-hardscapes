@@ -6,6 +6,7 @@ import { FinalProposal } from '../../project/final-proposal/entities/final-propo
 import { FinalProposalStatus } from '../../project/final-proposal/enums';
 import { EstimateStatus } from '../../project/enums';
 import { Milestone } from '../../project/entities/milestone.entity';
+import { SubContract } from '../../project/sub-contract/entities/sub-contract.entity';
 
 export class AddEvent {
   readonly type: EventType;
@@ -104,29 +105,29 @@ export class CustomerRequestedCashPaymentEvent extends AddEvent {
   }
 }
 
-export class ContractorRequestedToReleaseMilestoneEvent extends AddEvent {
+export class ConsultantRequestedToReleaseMilestoneEvent extends AddEvent {
   meta: any;
 
   constructor(user: User, milestone: Milestone) {
-    super(EventType.ContractorRequestedToReleaseMilestone, user, 'Contractor requested to release a milestone.');
+    super(EventType.ConsultantRequestedToReleaseMilestone, user, 'Consultant requested to release a milestone.');
     this.meta = milestone;
   }
 }
 
-export class ContractorConfirmedCashPaymentEvent extends AddEvent {
+export class ConsultantConfirmedCashPaymentEvent extends AddEvent {
   meta: any;
 
   constructor(user: User, milestone: Milestone) {
-    super(EventType.ContractorConfirmedCashPayment, user, 'Contractor has confirmed your cash payment.');
+    super(EventType.ConsultantConfirmedCashPayment, user, 'Consultant has confirmed your cash payment.');
     this.meta = milestone;
   }
 }
 
-export class ContractorRequestedReviewEvent extends AddEvent {
+export class ConsultantRequestedReviewEvent extends AddEvent {
   meta: any;
 
   constructor(user: User, project: Project) {
-    super(EventType.ContractorRequestedReviewEvent, user, 'Contractor has requested to review on a project.');
+    super(EventType.ConsultantRequestedReviewEvent, user, 'Consultant has requested to review on a project.');
     this.meta = project;
   }
 }
@@ -208,6 +209,132 @@ export class PickOutPaversScheduleUpdatedEvent extends AddEvent {
 
   constructor(user: User, project: Project) {
     super(EventType.PickOutPaversScheduleUpdatedEvent, user, 'Picking out pavers schedule has been updated.');
+    this.meta = project;
+  }
+}
+
+export class ContractorProfileUpdatedEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, contractorUser: User) {
+    super(EventType.ContractorProfileUpdatedEvent, user, 'A contractor has updated his profile.');
+    this.meta = contractorUser;
+  }
+}
+
+export class AdminApprovedBasicProfileEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User) {
+    super(EventType.AdminApprovedBasicProfileEvent, user, 'Administrator has approved your basic profile. Please sign legal terms.');
+    this.meta = {};
+  }
+}
+
+export class AdminDeclinedOnboardingContractorEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User) {
+    super(EventType.AdminDeclinedOnboardingContractorEvent, user, 'Administrator has declined your basic profile.');
+    this.meta = {};
+  }
+}
+
+export class ContractorSignedLegalTermsEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, contractorUser: User) {
+    super(EventType.ContractorSignedLegalTermsEvent, user, `${contractorUser.fullName} has signed legal terms.`);
+    this.meta = contractorUser;
+  }
+}
+
+export class ContractorSetupPaymentEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, contractorUser: User) {
+    super(EventType.ContractorSetupPaymentEvent, user, `${contractorUser.fullName} has finished setting up payment.`);
+    this.meta = contractorUser;
+  }
+}
+
+export class ContractorFinishedSettingUpStripeAccountEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, contractorUser: User) {
+    super(EventType.ContractorFinishedSettingUpStripeAccountEvent, user, `${contractorUser.fullName} has finished setting up stripe account.`);
+    this.meta = contractorUser;
+  }
+}
+
+export class ConsultantInvitedContractorToProjectEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, project: Project) {
+    super(EventType.ConsultantInvitedContractorToProjectEvent, user, 'You have been invited to a project.');
+    this.meta = project;
+  }
+}
+
+export class SitePlanUpdatedEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, project: Project) {
+    super(EventType.SitePlanUpdatedEvent, user, 'Consultant has updated site plan.');
+    this.meta = project;
+  }
+}
+
+export class ContractorAcceptedProjectEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, contractorUser: User, project: Project, subContract: SubContract) {
+    super(EventType.ContractorAcceptedProjectEvent, user, `${contractorUser.fullName} has accepted project invitation.`);
+    this.meta = { project, subContract };
+  }
+}
+
+export class ContractorDeclinedProjectEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, contractorUser: User, project: Project, subContract: SubContract) {
+    super(EventType.ContractorDeclinedProjectEvent, user, `${contractorUser.fullName} has declined project invitation.`);
+    this.meta = { project, subContract };
+  }
+}
+
+export class ContractorFinishedProjectEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, contractorUser: User, project: Project, subContract: SubContract) {
+    super(EventType.ContractorFinishedProjectEvent, user, `${contractorUser.fullName} has finished a project.`);
+    this.meta = { project, subContract };
+  }
+}
+
+export class ContractorRequestedMilestoneReleaseEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, contractorUser: User, project: Project, subContract: SubContract) {
+    super(EventType.ContractorRequestedMilestoneReleaseEvent, user, `${contractorUser.fullName} has requested to release a milestone.`);
+    this.meta = { project, subContract };
+  }
+}
+
+export class ConsultantRequestedMilestoneReleaseEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, project: Project, subContract: SubContract) {
+    super(EventType.ConsultantRequestedMilestoneReleaseEvent, user, `Milestone release requested.`);
+    this.meta = { project, subContract };
+  }
+}
+
+export class AdminPaidSubContractMilestoneEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, project: Project) {
+    super(EventType.AdminPaidSubContractMilestoneEvent, user, `Sub contract milestone has been released.`);
     this.meta = project;
   }
 }

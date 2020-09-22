@@ -9,6 +9,7 @@ import { PortfolioService } from './portfolio.service';
     TypeOrmModule.forFeature([Portfolio]),
   ],
   providers: [PortfolioService],
+  exports: [PortfolioService],
 })
 export class PortfolioModule {
 }

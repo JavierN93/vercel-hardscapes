@@ -41,7 +41,7 @@ export class SocketGateway {
 
   sendMessage(message: Message) {
     this.server.emit(`${message.chat.project.customer.user.id}_messages`, message.toDto());
-    this.server.emit(`${message.chat.project.contractor.user.id}_messages`, message.toDto());
+    this.server.emit(`${message.chat.project.consultant.user.id}_messages`, message.toDto());
     // TODO: send event to admin always
   }
 

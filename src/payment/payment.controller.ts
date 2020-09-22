@@ -3,11 +3,12 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Headers,
   Param,
   Post,
   Req,
-  Request,
+  Request, UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -34,6 +35,9 @@ import { EditFinalMilestoneDto, EditMilestoneDto } from './dtos/edit-milestone.d
 import { MilestoneType, PaymentMethod } from './enums';
 import { MakeHoldDto } from './dtos/make-hold.dto';
 import { Refund } from './entities/refund.entity';
+import { UrlResponseDto } from '../common/dtos/url-response.dto';
+import { ContractorStatus } from '../users/enums';
+import { sleep } from '../common/utils/common.util';
 
 @ApiTags('Payment')
 @Controller('api/payment')
@@ -60,7 +64,7 @@ export class PaymentController {
     await this.projectService.updateMilestone(milestone);
     const admins = await this.userService.findSuperAdmins();
     const project = await this.projectService.findProjectById(milestone.project.id);
-    const notificationRecipients = admins.find(admin => admin.id === project.contractor.user.id) ? admins : [...admins, project.contractor.user];
+    const notificationRecipients = admins.find(admin => admin.id === project.consultant.user.id) ? admins : [...admins, project.consultant.user];
     await this.notificationService.customerRequestedCashPaymentEvent(notificationRecipients, milestone);
     return milestone;
   }
@@ -112,7 +116,7 @@ export class PaymentController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Post(':projectId/edit-cash-payment')
   @ApiImplicitParam({ name: 'projectId', required: true })
   @ApiOkResponse({ type: () => Milestone })
@@ -124,7 +128,7 @@ export class PaymentController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Delete('add-on/:addOnId')
   @ApiImplicitParam({ name: 'addOnId', required: true })
   @ApiOkResponse({ type: () => Milestone, isArray: true })
@@ -137,7 +141,7 @@ export class PaymentController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Post(':milestoneId/add-on')
   @ApiImplicitParam({ name: 'milestoneId', required: true })
   @ApiOkResponse({ type: () => Milestone, isArray: true })
@@ -156,7 +160,7 @@ export class PaymentController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Post(':milestoneId/edit-amount')
   @ApiImplicitParam({ name: 'milestoneId', required: true })
   @ApiOkResponse({ type: () => Milestone, isArray: true })
@@ -183,7 +187,7 @@ export class PaymentController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Post(':projectId/add-refund')
   @ApiImplicitParam({ name: 'projectId', required: true })
   @ApiOkResponse({ type: () => Refund })
@@ -220,7 +224,7 @@ export class PaymentController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Post(':milestoneId/confirm-cash-pay')
   @ApiOkResponse({ type: Milestone })
   async payWithCash(@Param('milestoneId') milestoneId: string): Promise<Milestone> {
@@ -230,14 +234,14 @@ export class PaymentController {
       return milestone;
     }
     await this.projectService.setMilestonePaid(milestone, PaymentMethod.Cash);
-    await this.notificationService.contractorConfirmedCashPaymentEvent(project.user, milestone);
+    await this.notificationService.consultantConfirmedCashPaymentEvent(project.user, milestone);
     this.sendMilestonePaymentEmail(project, milestone);
     return milestone;
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Post(':milestoneId/request-release')
   @ApiOkResponse({ type: Milestone })
   async requestReleaseMilestone(@Param('milestoneId') milestoneId: string): Promise<Milestone> {
@@ -246,7 +250,7 @@ export class PaymentController {
     if (milestone.status === MilestoneStatus.Released) {
       return milestone;
     }
-    await this.notificationService.contractorRequestedToReleaseMilestoneEvent(project.user, milestone);
+    await this.notificationService.consultantRequestedToReleaseMilestoneEvent(project.user, milestone);
     this.sendMilestoneRequestEmail(project, milestone);
     return this.projectService.requestReleaseMilestone(milestoneId);
   }
@@ -284,28 +288,72 @@ export class PaymentController {
     await this.paymentService.makeCharge(bankAccountToken, amount, `Charge milestone ${milestone.order + 1} for Landscaping project "${project.name}"`);
     await this.projectService.setMilestonePaid(milestone, PaymentMethod.Bank);
     const admins = await this.userService.findSuperAdmins();
-    const notificationRecipients = admins.find(admin => admin.id === project.contractor.user.id) ? admins : [...admins, project.contractor.user];
+    const notificationRecipients = admins.find(admin => admin.id === project.consultant.user.id) ? admins : [...admins, project.consultant.user];
     await this.notificationService.customerReleasedMilestoneEvent(notificationRecipients, milestone);
     this.sendMilestonePaymentEmail(project, milestone);
     return this.projectService.findMilestoneById(milestone.id);
   }
 
+  @Get('stripe-account-setup-page-link')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.Contractor])
+  @ApiOkResponse({ type: () => UrlResponseDto })
+  async getStripeAccountSetupPageLink(@Request() request): Promise<UrlResponseDto> {
+    const userId = request.user.id;
+    const user = await this.userService.findUserById(userId);
+    if (!user.contractorProfile) {
+      throw new UnauthorizedException('You don\'t need to setup stripe account for a contractor.');
+    }
+    let stripeAccountId = user.contractorProfile.stripeAccountId;
+    if (!stripeAccountId) {
+      stripeAccountId = await this.paymentService.createStripeAccount(user.email);
+      user.contractorProfile.stripeAccountId = stripeAccountId;
+      await this.userService.updateContractorProfile(user.contractorProfile);
+    }
+    const url = await this.paymentService.stripeAccountLink(stripeAccountId);
+    return { url };
+  }
+
   @Post('stripe-webhook')
   async stripeWebhook(@Headers('stripe-signature') signature: string, @Req() request: any) {
-    const [paymentIntentId, eventType] = this.paymentService.createPaymentEvent(signature, request.rawBody);
-
-    if (eventType === 'payment_intent.succeeded') {
-      const milestone = await this.projectService.findMilestoneByPaymentId(paymentIntentId);
-      if (!milestone) {
-        return new SuccessResponse(true, 'Could not find the milestone.');
+    const event = this.paymentService.createStripeEvent(signature, request.rawBody);
+    const eventType = event.type;
+    switch (eventType) {
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object;
+        const paymentIntentId = paymentIntent.id;
+        const milestone = await this.projectService.findMilestoneByPaymentId(paymentIntentId);
+        if (!milestone) {
+          return new SuccessResponse(true, 'Could not find the milestone.');
+        }
+        // hotfix: issue #19 - https://github.com/Jobhubgroup/hardscapes-api/issues/19
+        // sleep 2 second for verify credit card payment method to be processed
+        await sleep(2000);
+        const paid = await this.projectService.isMilestonePaidByPaymentId(paymentIntentId);
+        if (!paid) {
+          const milestone = await this.projectService.setMilestonePaidByPaymentId(paymentIntentId, PaymentMethod.CreditCard);
+          await this.postCreditCardPaymentSucceed(paymentIntentId, milestone);
+        }
+        break;
       }
-      const paid = await this.projectService.isMilestonePaidByPaymentId(paymentIntentId);
-      if (!paid) {
-        const milestone = await this.projectService.setMilestonePaidByPaymentId(paymentIntentId, PaymentMethod.CreditCard);
-        await this.postCreditCardPaymentSucceed(paymentIntentId, milestone);
+      case 'account.updated': {
+        const account = event.data.object;
+        const validated = this.paymentService.validateStripeAccount(account);
+        const accountId = account.id;
+        const contractorProfile = await this.userService.findContractorByStripeAccountId(accountId);
+        const userId = contractorProfile.user.id;
+        if (!contractorProfile) {
+          throw new BadRequestException('not a registered account.');
+        }
+        if (validated) {
+          contractorProfile.status = ContractorStatus.PaymentVerified;
+          await this.userService.updateContractorProfile(contractorProfile);
+          const contractorUser = await this.userService.findUserById(userId);
+          const admins = await this.userService.findSuperAdmins();
+          await this.notificationService.contractorFinishedSettingUpStripeAccountEvent(admins, contractorUser);
+        }
       }
-    } else if (eventType === 'payment_intent.payment_failed') {
-      // TODO: add failed handler (not sure at this moment of writing)
     }
     return new SuccessResponse(true);
   }
@@ -342,7 +390,7 @@ export class PaymentController {
     const project = await this.projectService.findProjectById(milestone.project.id);
     this.sendMilestonePaymentEmail(project, milestone);
     const admins = await this.userService.findSuperAdmins();
-    const notificationRecipients = admins.find(admin => admin.id === project.contractor.user.id) ? admins : [...admins, project.contractor.user];
+    const notificationRecipients = admins.find(admin => admin.id === project.consultant.user.id) ? admins : [...admins, project.consultant.user];
     await this.notificationService.customerReleasedMilestoneEvent(notificationRecipients, milestone);
   }
 

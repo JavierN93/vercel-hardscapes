@@ -11,5 +11,15 @@ export class ColumnNumericTransformer {
   }
 }
 
+export class NumericRangeTransformer {
+  to(data: number[]): string {
+    return JSON.stringify(data);
+  }
+
+  from(data: string): number[] {
+    return JSON.parse(`${data.substr(0, data.length - 1)}]`);
+  }
+}
+
 export const AfterDate = (date: Date) => Between(date, addYears(date, 100));
 export const BeforeDate = (date: Date) => Between(subYears(date, 100), date);

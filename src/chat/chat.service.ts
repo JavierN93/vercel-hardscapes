@@ -31,8 +31,8 @@ export class ChatService {
 
   findChatById(id: string): Promise<Chat> {
     return this.chatRepository.findOne({
-      relations: [ 'project', 'project.customer', 'project.customer.user', 'project.contractor', 'project.contractor.user' ],
-      where: { id }
+      relations: ['project', 'project.customer', 'project.customer.user', 'project.consultant', 'project.consultant.user'],
+      where: { id },
     });
   }
 
@@ -43,10 +43,10 @@ export class ChatService {
       .leftJoinAndSelect('chat.project', 'project')
       .leftJoinAndSelect('project.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'customer_user')
-      .leftJoinAndSelect('project.contractor', 'contractor')
-      .leftJoinAndSelect('contractor.user', 'contractor_user')
+      .leftJoinAndSelect('project.consultant', 'consultant')
+      .leftJoinAndSelect('consultant.user', 'consultant_user')
       .where('message.id = :id', { id })
-      .andWhere('(contractor_user.id = :userId or customer_user.id = :userId)', { userId })
+      .andWhere('(consultant_user.id = :userId or customer_user.id = :userId)', { userId })
       .andWhere('message.readAt is null')
       .getOne();
     if (message) {
@@ -79,9 +79,9 @@ export class ChatService {
       .leftJoinAndSelect('chat.project', 'project')
       .leftJoinAndSelect('project.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'customer_user')
-      .leftJoinAndSelect('project.contractor', 'contractor')
-      .leftJoinAndSelect('contractor.user', 'contractor_user')
-      .where('(contractor_user.id = :userId or customer_user.id = :userId)', { userId })
+      .leftJoinAndSelect('project.consultant', 'consultant')
+      .leftJoinAndSelect('consultant.user', 'consultant_user')
+      .where('(consultant_user.id = :userId or customer_user.id = :userId)', { userId })
       .andWhere('chat.id = :chatId', { chatId })
       .andWhere('message.createdAt <= :date', { date })
       .andWhere('message.readAt is null')
@@ -98,15 +98,15 @@ export class ChatService {
       .leftJoinAndSelect('chat.project', 'project')
       .leftJoinAndSelect('project.customer', 'project_customer')
       .leftJoinAndSelect('project_customer.user', 'project_customer_user')
-      .leftJoinAndSelect('project.contractor', 'project_contractor')
-      .leftJoinAndSelect('project_contractor.user', 'project_contractor_user')
+      .leftJoinAndSelect('project.consultant', 'project_consultant')
+      .leftJoinAndSelect('project_consultant.user', 'project_consultant_user')
       .where('project_customer_user.id = :userId', { userId })
-      .orWhere('project_contractor_user.id = :userId', { userId })
+      .orWhere('project_consultant_user.id = :userId', { userId })
       .getMany();
 
     const withMessages = await this.chatRepository.createQueryBuilder('chat')
       .leftJoinAndSelect('chat.messages', 'messages')
-      .where(user.role === UserRole.Customer ? 'messages.from = \'FROM_CONTRACTOR\'' : 'messages.from = \'FROM_CUSTOMER\'')
+      .where(user.role === UserRole.Customer ? `messages.from = '${MessageFrom.FromConsultant}'` : `messages.from = '${MessageFrom.FromCustomer}'`)
       .andWhere('messages.readAt is null')
       .getMany();
     chats.forEach(chat => {
@@ -122,8 +122,8 @@ export class ChatService {
       .leftJoinAndSelect('chat.project', 'project')
       .leftJoinAndSelect('project.customer', 'project_customer')
       .leftJoinAndSelect('project_customer.user', 'project_customer_user')
-      .leftJoinAndSelect('project.contractor', 'project_contractor')
-      .leftJoinAndSelect('project_contractor.user', 'project_contractor_user')
+      .leftJoinAndSelect('project.consultant', 'project_consultant')
+      .leftJoinAndSelect('project_consultant.user', 'project_consultant_user')
       .where('project.id = :id', { id: project.id })
       .getOne();
     if (chat) {
@@ -140,7 +140,7 @@ export class ChatService {
     const message = new Message();
     message.text = payload.message;
     message.attachments = payload.attachments;
-    message.from = user.role === UserRole.Customer ? MessageFrom.FromCustomer : MessageFrom.FromContractor;
+    message.from = user.role === UserRole.Customer ? MessageFrom.FromCustomer : MessageFrom.FromConsultant;
     message.chat = chat;
     const res = await this.messageRepository.save(message);
     this.socketService.message$.next(res);
@@ -165,9 +165,9 @@ export class ChatService {
       .leftJoinAndSelect('chat.project', 'project')
       .leftJoinAndSelect('project.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'customer_user')
-      .leftJoinAndSelect('project.contractor', 'contractor')
-      .leftJoinAndSelect('contractor.user', 'contractor_user')
-      .where('(contractor_user.id = :userId or customer_user.id = :userId)', { userId })
+      .leftJoinAndSelect('project.consultant', 'consultant')
+      .leftJoinAndSelect('consultant.user', 'consultant_user')
+      .where('(consultant_user.id = :userId or customer_user.id = :userId)', { userId })
       .andWhere('message.readAt is null')
       .getMany();
     const arrived = this.filterArrivedMessages(messages, user);
@@ -182,20 +182,20 @@ export class ChatService {
       .leftJoinAndSelect('chat.project', 'project')
       .leftJoinAndSelect('project.customer', 'customer')
       .leftJoinAndSelect('customer.user', 'customer_user')
-      .leftJoinAndSelect('project.contractor', 'contractor')
-      .leftJoinAndSelect('contractor.user', 'contractor_user')
+      .leftJoinAndSelect('project.consultant', 'consultant')
+      .leftJoinAndSelect('consultant.user', 'consultant_user')
       .where('message.readAt is null')
       .andWhere('message.mailed is false')
       .select(['chat.id', 'message.id', 'message.text', 'message.createdAt', 'message.from',
-        'customer_user.email', 'contractor_user.email', 'project.name', 'customer_user.firstName', 'customer_user.lastName', 'contractor_user.firstName', 'contractor_user.lastName'])
+        'customer_user.email', 'consultant_user.email', 'project.name', 'customer_user.firstName', 'customer_user.lastName', 'consultant_user.firstName', 'consultant_user.lastName'])
       .groupBy('chat.id')
       .addGroupBy('message.id')
       .addGroupBy('customer_user.email')
       .addGroupBy('customer_user.firstName')
       .addGroupBy('customer_user.lastName')
-      .addGroupBy('contractor_user.email')
-      .addGroupBy('contractor_user.firstName')
-      .addGroupBy('contractor_user.lastName')
+      .addGroupBy('consultant_user.email')
+      .addGroupBy('consultant_user.firstName')
+      .addGroupBy('consultant_user.lastName')
       .addGroupBy('project.name')
       .orderBy('message.createdAt', 'ASC')
       .getRawMany();
@@ -204,12 +204,12 @@ export class ChatService {
     Object.keys(chatGroup).map(chatId => {
       chatGroup[chatId] = groupByArray(chatGroup[chatId], 'message_from');
       const fromCustomer = chatGroup[chatId][MessageFrom.FromCustomer];
-      const fromContractor = chatGroup[chatId][MessageFrom.FromContractor];
+      const fromConsultant = chatGroup[chatId][MessageFrom.FromConsultant];
       if (fromCustomer) {
         pendingMessages.push({ ...ChatService.groupMessages(fromCustomer, MessageFrom.FromCustomer), chatId });
       }
-      if (fromContractor) {
-        pendingMessages.push({ ...ChatService.groupMessages(fromContractor, MessageFrom.FromContractor), chatId });
+      if (fromConsultant) {
+        pendingMessages.push({ ...ChatService.groupMessages(fromConsultant, MessageFrom.FromConsultant), chatId });
       }
     });
     return pendingMessages;
@@ -224,8 +224,8 @@ export class ChatService {
   private filterArrivedMessages(messages: Message[], user: User) {
     return messages.filter(x => {
       if (user.role === UserRole.Customer) {
-        return x.from === MessageFrom.FromContractor
-      } else if (user.role === UserRole.Contractor || user.role === UserRole.SuperAdmin) {
+        return x.from === MessageFrom.FromConsultant;
+      } else if (user.role === UserRole.Consultant || user.role === UserRole.SuperAdmin) {
         return x.from === MessageFrom.FromCustomer;
       } else {
         return false;
@@ -239,9 +239,9 @@ export class ChatService {
       return msg;
     }, '');
     const createdAt = messages[messages.length - 1].message_createdAt;
-    const email = from === MessageFrom.FromContractor ? messages[0].customer_user_email : messages[0].contractor_user_email;
-    const recipientName = MessageFrom.FromCustomer ? `${messages[0].contractor_user_firstName} ${messages[0].contractor_user_lastName}` : `${messages[0].customer_user_firstName} ${messages[0].customer_user_lastName}`;
-    const senderName = MessageFrom.FromCustomer ? `${messages[0].customer_user_firstName} ${messages[0].customer_user_lastName}` : `${messages[0].contractor_user_firstName} ${messages[0].contractor_user_lastName}`;
+    const email = from === MessageFrom.FromConsultant ? messages[0].customer_user_email : messages[0].consultant_user_email;
+    const recipientName = MessageFrom.FromCustomer ? `${messages[0].consultant_user_firstName} ${messages[0].consultant_user_lastName}` : `${messages[0].customer_user_firstName} ${messages[0].customer_user_lastName}`;
+    const senderName = MessageFrom.FromCustomer ? `${messages[0].customer_user_firstName} ${messages[0].customer_user_lastName}` : `${messages[0].consultant_user_firstName} ${messages[0].consultant_user_lastName}`;
     return {
       message,
       createdAt,

@@ -3,7 +3,6 @@ import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { ProjectService } from '../project/project.service';
 import { UsersService } from '../users/users.service';
-import { NetworkContractorService } from '../network-contractor/network-contractor.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -14,14 +13,13 @@ import { SearchResultDto } from './dtos/search-result.dto';
 @ApiTags('Search')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles([UserRole.Contractor, UserRole.SuperAdmin])
+@Roles([UserRole.Consultant, UserRole.SuperAdmin])
 @Controller('api/search')
 export class SearchController {
 
   constructor(
     private readonly projectService: ProjectService,
     private readonly userService: UsersService,
-    private readonly networkContractorService: NetworkContractorService
   ) {
   }
 
@@ -34,9 +32,8 @@ export class SearchController {
     }
     result.projects = await this.projectService.findProjectsByKeyword(query.keyword);
     const users = await this.userService.findUsersByKeyword(query.keyword);
-    result.networkContractors = await this.networkContractorService.findContractorsByKeyword(query.keyword);
     result.customers = users.filter(x => x.role === UserRole.Customer).map(x => x.toUserDto());
-    result.contractors = users.filter(x => x.role === UserRole.Contractor).map(x => x.toUserDto());
+    result.consultants = users.filter(x => x.role === UserRole.Consultant).map(x => x.toUserDto());
     return result;
   }
 

@@ -51,6 +51,10 @@ export class AuthService {
     return this.usersService.findUserByEmail(email);
   }
 
+  async findUserById(id: string): Promise<User> {
+    return this.usersService.findUserById(id);
+  }
+
   async acceptInvite(body: AcceptInviteDto): Promise<TokenResponse> {
     const user = await this.usersService.findUserById(body.token);
     if (!user) {

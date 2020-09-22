@@ -23,7 +23,7 @@ import { Estimate } from '../estimate/entities/estimate.entity';
 import { FinalProposal } from '../final-proposal/entities/final-proposal.entity';
 import { Milestone } from './milestone.entity';
 import { CustomerProfile } from '../../users/entities/customer-profile.entity';
-import { ContractorProfile } from '../../users/entities/contractor-profile.entity';
+import { ConsultantProfile } from '../../users/entities/consultant-profile.entity';
 import { User } from '../../users/entities/user.entity';
 import { Chat } from '../../chat/entities/chat.entity';
 import { ColumnNumericTransformer } from '../../common/utils/typeorm.util';
@@ -33,6 +33,9 @@ import { Schedule } from '../../schedule/entities/schedule.entity';
 import { EmailLog } from '../../email/entities/email-status.entity';
 import { MaterialRequest } from '../material-request/entities/material-request.entity';
 import { MaterialOrderGroup } from '../material-order/entities/material-order-group.entity';
+import { ContractorProfile } from '../../users/entities/contractor-profile.entity';
+import { SiteVisit } from '../site-visit/entities/site-visit.entity';
+import { SubContract } from '../sub-contract/entities/sub-contract.entity';
 
 @Entity('project')
 export class Project extends SoftDelete {
@@ -40,6 +43,10 @@ export class Project extends SoftDelete {
   @ApiProperty({ type: () => CustomerProfile })
   @ManyToOne(() => CustomerProfile, customer => customer.projects)
   customer: CustomerProfile;
+
+  @ApiProperty({ type: () => ConsultantProfile })
+  @ManyToOne(() => ConsultantProfile, consultant => consultant.projects)
+  consultant: ConsultantProfile;
 
   @ApiProperty({ type: () => ContractorProfile })
   @ManyToOne(() => ContractorProfile, contractor => contractor.projects)
@@ -225,6 +232,10 @@ export class Project extends SoftDelete {
   @JoinColumn()
   estimate: Estimate;
 
+  @OneToOne(() => SiteVisit, siteVisit => siteVisit.project)
+  @JoinColumn()
+  siteVisit: SiteVisit;
+
   @OneToOne(() => FinalProposal, proposal => proposal.project)
   @JoinColumn()
   finalProposal: FinalProposal;
@@ -271,9 +282,12 @@ export class Project extends SoftDelete {
   @OneToMany(() => MaterialOrderGroup, group => group.project)
   materialOrderGroups: MaterialOrderGroup[];
 
+  @OneToMany(() => SubContract, subContract => subContract.project)
+  subContracts: SubContract[];
+
   user?: User;
 
-  assignedContractor?: User;
+  assignedConsultant?: User;
 
   patioPackageProject?: boolean;
 }

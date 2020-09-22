@@ -26,7 +26,7 @@ export class ChatController {
     if (!chat) {
       throw new BadRequestException('Invalid chat id');
     }
-    if (chat.project.customer.user.id !== user.id && chat.project.contractor.user.id !== user.id) {
+    if (chat.project.customer.user.id !== user.id && chat.project.consultant.user.id !== user.id) {
       throw new BadRequestException('You are not participant to this conversation.');
     }
   }
@@ -52,8 +52,8 @@ export class ChatController {
     if (!project) {
       throw new BadRequestException('Invalid project id');
     }
-    if (!project.assignedContractor) {
-      throw new BadRequestException('No contractor assigned to this project yet');
+    if (!project.assignedConsultant) {
+      throw new BadRequestException('No consultant assigned to this project yet');
     }
     return this.chatService.initChat(project);
   }
@@ -91,8 +91,8 @@ export class ChatController {
     if (chat.project.customer.user.email === from) {
       await this.chatService.sendMessage(payload, chat, chat.project.customer.user);
       return new SuccessResponse(true);
-    } else if (chat.project.contractor.user.email === from) {
-      await this.chatService.sendMessage(payload, chat, chat.project.contractor.user);
+    } else if (chat.project.consultant.user.email === from) {
+      await this.chatService.sendMessage(payload, chat, chat.project.consultant.user);
       return new SuccessResponse(true);
     } else {
       return new SuccessResponse(false);

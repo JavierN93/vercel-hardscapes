@@ -57,7 +57,7 @@ export class AppService extends NestSchedule {
     for (let i = 0; i < siteVisitPendingSchedules.length; i++) {
       const schedule = siteVisitPendingSchedules[i];
       try {
-        const recipients = admins.find(a => a.id === schedule.estimate.project.contractor.user.id) ? admins : [...admins, schedule.estimate.project.contractor.user];
+        const recipients = admins.find(a => a.id === schedule.estimate.project.consultant.user.id) ? admins : [...admins, schedule.estimate.project.consultant.user];
         await Promise.all(recipients.map(r => this.emailService.sendSiteVisitReminderForCustomerEmail(r, schedule)));
         await this.estimateService.markSiteVisitScheduleReminderSent(schedule);
       } catch (e) {

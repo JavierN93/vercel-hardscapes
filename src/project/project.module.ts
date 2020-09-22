@@ -33,10 +33,27 @@ import { ScheduleService } from '../schedule/schedule.service';
 import { EstimateService } from './estimate/estimate.service';
 import { FinalProposalService } from './final-proposal/final-proposal.service';
 import { MaterialRequestService } from './material-request/material-request.service';
-import { MaterialOrderController } from './material-order/material-order.controller';
 import { MaterialOrderService } from './material-order/material-order.service';
+import { MaterialOrderController } from './material-order/material-order.controller';
 import { MaterialOrderGroup } from './material-order/entities/material-order-group.entity';
 import { MaterialOrderItem } from './material-order/entities/material-order-item.entity';
+import { SiteVisitController } from './site-visit/site-visit.controller';
+import { SiteVisitService } from './site-visit/site-visit.service';
+import { SiteVisit } from './site-visit/entities/site-visit.entity';
+import { SitePlanController } from './site-plan/site-plan.controller';
+import { SitePlanService } from './site-plan/site-plan.service';
+import { SitePlan } from '../contractor/entities/site-plan.entity';
+import { CostItem } from '../contractor/entities/cost-item.entity';
+import { CustomPaymentItem } from '../contractor/entities/custom-payment-item.entity';
+import { SubContract } from './sub-contract/entities/sub-contract.entity';
+import { AccessoryMaterialDetail } from '../contractor/entities/accessory-material-detail.entity';
+import { SubContractController } from './sub-contract/sub-contract.controller';
+import { SubContractService } from './sub-contract/sub-contract.service';
+import { SubContractMilestone } from './sub-contract/entities/sub-contract-milestone.entity';
+import { MaterialReturn } from './sub-contract/entities/material-return.entity';
+import { PaymentService } from '../payment/payment.service';
+import { SubContractActivity } from './sub-contract/entities/sub-contract-activity.entity';
+import { SubContractActivityService } from './sub-contract/sub-contract-activity.service';
 
 @Module({
   imports: [
@@ -58,6 +75,15 @@ import { MaterialOrderItem } from './material-order/entities/material-order-item
       MaterialRequest,
       MaterialOrderGroup,
       MaterialOrderItem,
+      SiteVisit,
+      SitePlan,
+      CostItem,
+      CustomPaymentItem,
+      SubContract,
+      AccessoryMaterialDetail,
+      SubContractMilestone,
+      MaterialReturn,
+      SubContractActivity,
     ]),
     UsersModule,
     IdeaBoardModule,
@@ -73,6 +99,9 @@ import { MaterialOrderItem } from './material-order/entities/material-order-item
     FinalProposalController,
     MaterialRequestController,
     MaterialOrderController,
+    SiteVisitController,
+    SitePlanController,
+    SubContractController,
   ],
   providers: [
     ProjectService,
@@ -81,6 +110,11 @@ import { MaterialOrderItem } from './material-order/entities/material-order-item
     ScheduleService,
     MaterialRequestService,
     MaterialOrderService,
+    SiteVisitService,
+    SitePlanService,
+    SubContractService,
+    PaymentService,
+    SubContractActivityService,
   ],
   exports: [
     ProjectService,

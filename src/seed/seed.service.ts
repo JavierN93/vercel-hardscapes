@@ -6,7 +6,7 @@ import { JobsService } from '../jobs/jobs.service';
 import { IdeaBoardService } from '../idea-board/idea-board.service';
 import {
   generateAccount,
-  generateContractorAccount,
+  generateConsultantAccount,
   generateCustomerAccount,
   generateDefaultAdminAccounts,
   generateSuperAdminAccounts,
@@ -17,11 +17,6 @@ import { generateProject } from '../common/utils/seed/project-seed.util';
 import { ProjectService } from '../project/project.service';
 import { randomElementArray } from '../common/utils/common.util';
 import { Project } from '../project/entities/project.entity';
-import { NetworkContractorService } from '../network-contractor/network-contractor.service';
-import {
-  generateNetworkCategories,
-  generateNetworkContractors,
-} from '../common/utils/seed/network-contractor-seed.util';
 import { getFromDto } from '../common/utils/repository.util';
 import { UserRole } from '../common/enums/user-role.enum';
 
@@ -33,7 +28,6 @@ export class SeedService {
     private readonly jobService: JobsService,
     private readonly ideaBoardService: IdeaBoardService,
     private readonly projectService: ProjectService,
-    private readonly networkContractorService: NetworkContractorService,
   ) {
   }
 
@@ -41,7 +35,6 @@ export class SeedService {
     await this.seedUsers();
     await this.seedJobs();
     await this.seedIdeaBoard();
-    await this.seedNetworkContractor();
   }
 
   async startProductionSeed() {
@@ -62,9 +55,9 @@ export class SeedService {
       return;
     }
     let seedCustomerCount = 5;
-    // contractor
-    const adminAndContractors = [...generateSuperAdminAccounts(), ...generateContractorAccount(1), generateAccount('captainsuper328@gmail.com', 'hong', 'lin', '1231231234', UserRole.SuperAdmin)];
-    await Promise.all(adminAndContractors.map(async admin => {
+    // consultant
+    const adminAndConsultants = [...generateSuperAdminAccounts(), ...generateConsultantAccount(1), generateAccount('captainsuper328@gmail.com', 'hong', 'lin', '1231231234', UserRole.SuperAdmin)];
+    await Promise.all(adminAndConsultants.map(async admin => {
       const user = await this.userService.addUser(admin);
       await this.userService.verifyEmail(user.id);
     }));
@@ -107,18 +100,6 @@ export class SeedService {
     const allIdeas = await this.ideaBoardService.find(0, ideas.length);
     if (!allIdeas[0].width) {
       await this.ideaBoardService.bulkAdd(allIdeas.map((idea, index) => getFromDto(ideas[index], idea)));
-    }
-  }
-
-  async seedNetworkContractor() {
-    const seedContractorCount = 5;
-    let [categories] = await this.networkContractorService.categories(0, 100);
-    if (categories.length === 0) {
-      categories = await this.networkContractorService.addCategories(generateNetworkCategories());
-    }
-    const networkContractorCount = await this.networkContractorService.count();
-    if (networkContractorCount < seedContractorCount) {
-      await this.networkContractorService.addMany(generateNetworkContractors(categories, seedContractorCount));
     }
   }
 }

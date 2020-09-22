@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Project } from '../../project/entities/project.entity';
 import { UserDto } from '../../auth/dtos/user.dto';
-import { NetworkContractor } from '../../network-contractor/entities/network-contractor.entity';
 
 export class SearchResultDto {
 
@@ -13,15 +12,11 @@ export class SearchResultDto {
   customers: UserDto[];
 
   @ApiProperty({ type: UserDto, isArray: true })
-  contractors: UserDto[];
-
-  @ApiProperty({ type: NetworkContractor, isArray: true })
-  networkContractors: NetworkContractor[];
+  consultants: UserDto[];
 
   constructor() {
     this.projects = [];
     this.customers = [];
-    this.contractors = [];
-    this.networkContractors = [];
+    this.consultants = [];
   }
 }

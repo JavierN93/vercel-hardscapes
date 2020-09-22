@@ -30,3 +30,24 @@ export enum PatioPackageAddition {
   Curbing = 'CURBING',
   PoolCoping = 'POOL_COPING',
 }
+
+export enum HardscapingPropertyType {
+  Residential = 'RESIDENTIAL',
+  Commercial = 'COMMERCIAL',
+  Municipality = 'MUNICIPALITY',
+}
+
+export enum ContractorStatus {
+  UserCreated = 'CREATED',
+  BasicProfileApproved = 'BASIC_PROFILE_APPROVED',
+  QualityCheckPassed = 'QUALITY_CHECK_PASSED',
+  ReputationCheckPassed = 'REPUTATION_CHECK_PASSED',
+  SignedLegalTerms = 'SIGNED_LEGAL_TERMS',
+  PaymentVerified = 'PAYMENT_VERIFIED',
+  Rejected = 'REJECTED',
+}
+
+export enum ContractorClass {
+  A = 'A',
+  B = 'B',
+}

@@ -3,7 +3,7 @@ import { utcToZonedTime } from 'date-fns-tz';
 import { TimeUnit } from '../enums/time.enum';
 
 
-const DefaultTimezone = 'America/Antigua';
+const DefaultTimezone = 'America/New_York';
 
 export function convertUtcToEstString(date: Date): string {
   const est = utcToZonedTime(date, DefaultTimezone);

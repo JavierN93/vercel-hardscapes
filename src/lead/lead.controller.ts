@@ -27,7 +27,7 @@ export class LeadController {
 
   @Get('all')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: LeadDto, isArray: true })
   async leads(@Query() query: QueryLeadsDto): Promise<PaginatorDto<LeadDto>> {
     const [result, count] = await this.leadService.findAll(query.skip || 0,
@@ -39,7 +39,7 @@ export class LeadController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: LeadDto })
   async lead(@Param('id') id: string): Promise<LeadDto> {
     const lead = await this.leadService.findLeadById(id);

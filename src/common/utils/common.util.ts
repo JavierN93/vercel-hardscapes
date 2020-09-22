@@ -42,3 +42,6 @@ export function randomImageUrlArray(options?: RandOption): string[] {
   return elements;
 }
 
+export function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

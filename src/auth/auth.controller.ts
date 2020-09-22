@@ -120,4 +120,16 @@ export class AuthController {
     await this.emailService.sendVerificationEmail(user);
     return new SuccessResponse(true);
   }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: User })
+  @Get('profile')
+  async profile(@Request() req): Promise<User> {
+    const user = await this.authService.findUserById(req.user.id);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return user;
+  }
 }

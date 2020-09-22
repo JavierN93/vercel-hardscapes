@@ -21,13 +21,13 @@ export const EmailTemplateSubjects = {
   [EmailType.NewProjectRegistered]: 'A New Project is ready for review',
   [EmailType.EstimateReminder]: `You've been requested to provide a virtual estimate on a new project`,
   [EmailType.EstimateAccepted]: `Site visit and finale proposal request`,
-  [EmailType.SiteVisitReminderForContractor]: `Your site visit with {{customerName}} is tomorrow`,
+  [EmailType.SiteVisitReminderForConsultant]: `Your site visit with {{customerName}} is tomorrow`,
   [EmailType.FinalProposalReminder]: `Submit your final proposal`,
   [EmailType.DepositMade]: `Your proposal has been accepted`,
   [EmailType.MilestonePaid]: `You've received a new milestone payment`,
   [EmailType.MessageReceived]: `Project consultation - {{projectName}}`,
   [EmailType.PasswordReset]: `Reset password`,
-  [EmailType.Invitation]: `You are invited to join ${globalConfig.companyName}`,
+  [EmailType.Invitation]: `You are invited to join {{companyName`,
   [EmailType.ContractSigned]: `{{customerName}} has signed a contract`,
   [EmailType.SiteVisitScheduleChangeRequest]: `{{customerName}} has requested another day for site visit`,
   [EmailType.ContractReady]: `Contract is ready`,
@@ -38,27 +38,39 @@ export const EmailTemplateSubjects = {
   [EmailType.EstimateDeclined]: `{{customerName}} has declined the estimate`,
   [EmailType.FinalProposalDeclined]: `{{customerName}} has declined the final proposal`,
   [EmailType.ChangeEmail]: `Verify your new email address`,
+  [EmailType.LegalTermsSignReminder]: `Please sign all legal terms`,
+  [EmailType.PaymentSetupReminder]: `Please setup payment`,
   [EmailType.DepositMilestoneUpdated]: 'Deposit updated!',
+  [EmailType.InvitedToProject]: 'You are invited to a project',
+  [EmailType.SitePlanUpdated]: 'Site plan updated',
+  [EmailType.ReceivedSubContractMilestonePayment]: '{{companyName has released a milestone',
+  [EmailType.SubContractAccepted]: '{{contractorName}} has accepted a project',
+  [EmailType.SubContractDeclined]: '{{contractorName}} has declined a project',
+  [EmailType.ContractorRequestedMilestonePayment]: '{{contractorName}} has requested to release a milestone',
+  [EmailType.ConsultantRequestedMilestonePayment]: '{{consultantName}} has requested to release a milestone',
+  [EmailType.SubContractCompleted]: '{{contractorName}} has completed a project',
+  [EmailType.ContractorUpdatedProfile]: '{{contractorName}} has updated their profile',
+  [EmailType.ContractorInvitation]: 'You have been invited as a Contractor candidate',
 };
 
 export const EmailTemplateContents = {
   [EmailType.ProjectCreated]: 'Hi {{name}},<br>Thanks for telling us about your project! We look forward to our call on {{consultationDate}} and are excited to learn more about your project.<br>If you have any questions in the mean time, please contact us via live chat Monday through Saturday 8am to 5pm.',
   [EmailType.EstimateReady]: 'Hi {{name}},<br>Thanks for telling us about your project! Please click on the link below to view your virtual estimate and to setup a site visit. <a href="{{estimateLink}}">See Estimate</a>',
-  [EmailType.SiteVisitScheduled]: `Hi {{name}},<br>Thanks for scheduling your site visit with {{companyName}}! Your site visit has been scheduled for {{siteVisitDate}}.<br><a href="{{rescheduleLink}}">Want to reschedule?</a>`,
-  [EmailType.SiteVisitReminderForCustomer]: `Hi {{name}},<br>This email is to remind you that your site visit is scheduled for {{siteVisitDate}}.<br>If you have any questions or need to reschedule, please reach out to {{companyName}} as soon as possible.<br><a href="{{rescheduleLink}}">Want to reschedule?</a>`,
-  [EmailType.ReceivedFinalProposal]: `Hi {{name}},<br>{{companyName}}  has submitted their final proposal for your project. Please review all the details and if you\'re satisfied, accept the proposal to hire {{companyName}}.<br><a href="{{finalProposalLink}}">See Final Proposal</a>`,
-  [EmailType.FinalProposalUpdated]: `Hi {{name}}.<br>{{companyName}} has submitted an updated final proposal for your project. Please review all the details and if you\'re satisfied, accept the proposal to hire {{companyName}}.<br><a href="{{finalProposalLink}}">See Final Proposal</a>`,
-  [EmailType.FinalProposalAccepted]: `Hi {{name}},<br>You have already made your first deposit and should expect {{companyName}} to reach out to you shortly. Your will be required to submit the next milestone payment when the {{companyName}} officially starts the project and requests payment.<br><a href="{{projectLink}}">Track your project</a>`,
+  [EmailType.SiteVisitScheduled]: 'Hi {{name}},<br>Thanks for scheduling your site visit with {{companyName}}! Your site visit has been scheduled for {{siteVisitDate}}.<br><a href="{{rescheduleLink}}">Want to reschedule?</a>',
+  [EmailType.SiteVisitReminderForCustomer]: 'Hi {{name}},<br>This email is to remind you that your site visit is scheduled for {{siteVisitDate}}.<br>If you have any questions or need to reschedule, please reach out to {{companyName}} as soon as possible.<br><a href="{{rescheduleLink}}">Want to reschedule?</a>',
+  [EmailType.ReceivedFinalProposal]: 'Hi {{name}},<br>{{companyName}}  has submitted their final proposal for your project. Please review all the details and if you\'re satisfied, accept the proposal to hire {{companyName}}.<br><a href="{{finalProposalLink}}">See Final Proposal</a>',
+  [EmailType.FinalProposalUpdated]: 'Hi {{name}}.<br>{{companyName}} has submitted an updated final proposal for your project. Please review all the details and if you\'re satisfied, accept the proposal to hire {{companyName}}.<br><a href="{{finalProposalLink}}">See Final Proposal</a>',
+  [EmailType.FinalProposalAccepted]: 'Hi {{name}},<br>You have already made your first deposit and should expect {{companyName}} to reach out to you shortly. Your will be required to submit the next milestone payment when the J & D landscaping officially starts the project and requests payment.<br><a href="{{projectLink}}">Track your project</a>',
   [EmailType.MilestonePaymentRequested]: 'Hi {{name}},<br>Please <a href="{{loginLink}}">login</a> to your account or <a href="{{projectLink}}">click here</a> to make a payment. Your next and last milestone payment will be due at the completion of your project.',
-  [EmailType.ReceivedMilestonePayment]: `Hi {{name}},<br>Thank you, {{companyName}} has received your payment for milestone 2.<a href="{{projectLink}}">Track your project</a>`,
-  [EmailType.FinalMilestonePaymentRequested]: `Hi {{name}},<br>{{companyName}} has requested payment on milestone 3 (project complete) payment.<br>Please <a href="{{loginLink}}">login</a> to your account or <a href="{{projectLink}}">click here</a> to make a payment.`,
-  [EmailType.FinalMilestoneModified]: `Hi {{name}},<br>{{companyName}} has requested a change order and payment on milestone 3 (project complete) payment.<br>Please <a href="{{loginLink}}">login</a> to your account or <a href="{{projectLink}}">click here</a> to confirm changes prior to payment.<br><a href="{{projectLink}}">Make payment</a>`,
-  [EmailType.TestimonialRequest]: `Hi {{name}},<br>Thank you for Hiring {{companyName}} to complete your outdoor project, it was a pleasure working with you.<br>We would love if you could help us continue to grow by leaving us a great google review about our company.<br><a href="{{reviewLink}}">Leave a review</a>`,
-  [EmailType.ConfirmRegister]: `Hi {{name}},<br>To Finish creating your {{companyName}} account, please confirm your email address by clicking in the following link.<br><a href="{{activateLink}}">Activate Account</a>`,
+  [EmailType.ReceivedMilestonePayment]: 'Hi {{name}},<br>Thank you, {{companyName}} has received your payment for milestone 2.<a href="{{projectLink}}">Track your project</a>',
+  [EmailType.FinalMilestonePaymentRequested]: 'Hi {{name}},<br>{{companyName}} has requested payment on milestone 3 (project complete) payment.<br>Please <a href="{{loginLink}}">login</a> to your account or <a href="{{projectLink}}">click here</a> to make a payment.',
+  [EmailType.FinalMilestoneModified]: 'Hi {{name}},<br>{{companyName}} has requested a change order and payment on milestone 3 (project complete) payment.<br>Please <a href="{{loginLink}}">login</a> to your account or <a href="{{projectLink}}">click here</a> to confirm changes prior to payment.<br><a href="{{projectLink}}">Make payment</a>',
+  [EmailType.TestimonialRequest]: 'Hi {{name}},<br>Thank you for Hiring {{companyName}} to complete your outdoor project, it was a pleasure working with you.<br>We would love if you could help us continue to grow by leaving us a great google review about our company.<br><a href="{{reviewLink}}">Leave a review</a>',
+  [EmailType.ConfirmRegister]: 'Hi {{name}},<br>To Finish creating your {{companyName}} account, please confirm your email address by clicking in the following link.<br><a href="{{activateLink}}">Activate Account</a>',
   [EmailType.NewProjectRegistered]: 'Hi {{name}},<br>Great News, another new project is ready to review!<br>Please follow the link below to view the project details or view your calendar.<br><a href="{{projectLink}}">See Project</a>',
   [EmailType.EstimateReminder]: `Hi {{name}},<br>This is just a friendly reminder that your estimate with {{customerName}} is due in 24 hours.<br>Please login to your account to view contact details or to message {{customerName}}.<br>Please submit your estimate within 24 hours.<br><a href="{{estimateLink}}">Create Estimate</a>`,
   [EmailType.EstimateAccepted]: `Hi {{name}},<br>{{customerName}}, would like to schedule a site visit with {{companyName}} on {{siteVisitDate}}.<br>Please login to your account to view contact details or to message {{customerName}}.<br>Please submit your final proposal within 48 hours from completion of site visit.<br><a href="{{confirmVisitLink}}">Confirm visit</a><br><a href="{{rescheduleLink}}">Want to reschedule?</a>`,
-  [EmailType.SiteVisitReminderForContractor]: `Hi {{name}},<br>This is a friendly reminder that your site visit with {{customerName}} is scheduled for {{scheduleDate}}.<br>Please login to your account to view contact details or to message {{customerName}}.<br>Please submit your final proposal within 48 hours from completion of site visit.`,
+  [EmailType.SiteVisitReminderForConsultant]: `Hi {{name}},<br>This is a friendly reminder that your site visit with {{customerName}} is scheduled for {{scheduleDate}}.<br>Please login to your account to view contact details or to message {{customerName}}.<br>Please submit your final proposal within 48 hours from completion of site visit.`,
   [EmailType.FinalProposalReminder]: `Hi {{name}},<br>{{customerName}} is waiting for your final proposal.<br>Please login and submit your proposal within the next 24 hours.<br><a href="{{proposalLink}}">Create Proposal</a>`,
   [EmailType.DepositMade]: `Hi {{name}},<br>{{customerName}}, has accepted your proposal and has paid their first milestone. Please reach out to {{customerName}} to coordinate an exact start date.<br>Remember, you an easily keep track of conversations and communication with customers directly from the message section of your account.<br><a href="{{sendMessageLink}}">SendMessage</a>`,
   [EmailType.MilestonePaid]: `Hi {{name}},<br>You've received a new milestone payment from {{customerName}}.<br>Click here to view the payment.<br><a href="{{paymentLink}}">Check payment</a>`,
@@ -75,8 +87,8 @@ export function emailTemplate(code: EmailType): string {
     const html = Fs.readFileSync(filePath);
     return html.toString();
   } else {
-    const unsubscribe = `<br><br>Send from ${globalConfig.companyName}<br>` +
-      '${globalConfig.companyName} ${globalConfig.companyType}, ${globalConfig.companyAddress}<br>' +
+    const unsubscribe = `<br><br>Sent from ${globalConfig.companyName}<br>` +
+      `${globalConfig.companyName} ${globalConfig.companyType}, ${globalConfig.companyAddress}<br>` +
       `<a href="${process.env.UNSUBSCRIBE_LINK}">Unsubscribe</a>`;
     return `${EmailTemplateContents[code]}${unsubscribe}`;
   }

@@ -11,7 +11,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 import { isUUID } from '@nestjs/common/utils/is-uuid';
 
@@ -57,6 +57,10 @@ import { MilestoneType } from '../payment/enums';
 import { CostUnit } from './estimate/enums';
 import { ScheduleStatus, ScheduleType } from '../schedule/enums';
 import { ConfirmGovernmentCallDto } from './dtos/confirm-government-call.dto';
+import { ContractorStatus } from '../users/enums';
+import { SubContract } from './sub-contract/entities/sub-contract.entity';
+import { SubContractService } from './sub-contract/sub-contract.service';
+import { SubContractStatus } from '../contractor/enums';
 
 @ApiTags('Project')
 @Controller('api/project')
@@ -73,6 +77,7 @@ export class ProjectController {
     private tagService: TagService,
     private scheduleService: ScheduleService,
     private customerVisitHistoryService: CustomerVisitHistoryService,
+    private subContractService: SubContractService,
     private leadService: LeadService,
   ) {
   }
@@ -86,6 +91,34 @@ export class ProjectController {
   async delete(@Param('id') id: string): Promise<SuccessResponse> {
     await this.projectService.deleteOne(id);
     return new SuccessResponse(true);
+  }
+
+  @ApiBearerAuth()
+  @Post(':projectId/invite-contractor/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.Consultant])
+  @ApiParam({ name: 'projectId', required: true })
+  @ApiParam({ name: 'userId', required: true })
+  @ApiOkResponse({ type: SubContract })
+  async inviteContractorToProject(@Param('projectId') projectId: string, @Param('userId') userId: string): Promise<SubContract> {
+    const project = await this.projectService.findProjectById(projectId);
+    const subContractorUsers = project.subContracts.map(subContract => subContract.contractor.user);
+    if (subContractorUsers.find(u => u.id === userId)) {
+      throw new BadRequestException('Selected contractor is already invited to the project.');
+    }
+    const contractorUser = await this.usersService.findUserById(userId);
+    if (!contractorUser.contractorProfile) {
+      throw new BadRequestException('Selected user is not a contractor.');
+    }
+    if (contractorUser.contractorProfile.status !== ContractorStatus.PaymentVerified) {
+      throw new BadRequestException('The contractor is not active yet.');
+    }
+    const subContract = new SubContract();
+    subContract.project = project;
+    subContract.status = SubContractStatus.Invited;
+    subContract.contractor = contractorUser.contractorProfile;
+    await this.projectService.saveSubContract(subContract);
+    return this.subContractService.findById(subContract.id);
   }
 
   @ApiBearerAuth()
@@ -109,7 +142,7 @@ export class ProjectController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(':id')
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiImplicitParam({ name: 'id', required: true })
   @ApiOkResponse({ type: Project })
   async update(@Request() request, @Param('id') id: string, @Body() body: UpdateProjectDto): Promise<Project> {
@@ -127,7 +160,7 @@ export class ProjectController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Get(':id/emails')
   @ApiImplicitParam({ name: 'id', required: true })
   @ApiOkResponse({ type: () => EmailLog, isArray: true })
@@ -141,7 +174,7 @@ export class ProjectController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Get(':id/customer-visit-history')
   @ApiImplicitParam({ name: 'id', required: true })
   @ApiOkResponse({ type: () => CustomerVisitHistory, isArray: true })
@@ -161,7 +194,7 @@ export class ProjectController {
   @ApiImplicitParam({ name: 'id', required: true })
   @ApiOkResponse({ type: () => Project })
   async continueToPayment(@Request() req, @Param('id') id: string): Promise<Project> {
-    const contractor = await this.usersService.findContractorProfileByUserId(req.user.id);
+    const consultant = await this.usersService.findConsultantProfileByUserId(req.user.id);
     const project = await this.projectService.findProjectById(id);
     if (!project.budget) {
       throw new BadRequestException('You should have approximate total budget in order to continue the payment directly.');
@@ -180,7 +213,7 @@ export class ProjectController {
       schedule.status = ScheduleStatus.Expired;
       schedule.type = ScheduleType.SiteVisitSchedule;
       estimateDto.siteVisitSchedules = [schedule];
-      project.estimate = await this.estimateService.saveEstimate(project, estimateDto, contractor);
+      project.estimate = await this.estimateService.saveEstimate(project, estimateDto, consultant);
     }
     if (!project.finalProposal) {
       project.estimate.items = project.estimate.items || [];
@@ -194,7 +227,7 @@ export class ProjectController {
     milestone.amount = project.budget;
     milestone.order = MilestoneType.Final;
     milestone.name = 'Project Completed';
-    milestone.comment = 'Upon completion of project, when the project is complete conduct a final walk through with contractor and make payment.';
+    milestone.comment = 'Upon completion of project, when the project is complete conduct a final walk through with consultant and make payment.';
     milestone.project = project;
     project.milestones = [await this.projectService.saveMilestone(milestone)];
     await this.projectService.saveProject(project);
@@ -218,8 +251,8 @@ export class ProjectController {
   async reschedule(@Request() request, @Param('id') id: string): Promise<SuccessResponse> {
     const project = await this.projectService.findProjectById(id);
     const admins = await this.usersService.findSuperAdmins();
-    const contractor = project.contractor ? project.contractor.user : null;
-    await this.notificationService.customerRescheduledSiteVisitEvent(admins.find(a => a.id === contractor.id) ? admins : [...admins, contractor], project);
+    const consultant = project.consultant ? project.consultant.user : null;
+    await this.notificationService.customerRescheduledSiteVisitEvent(admins.find(a => a.id === consultant.id) ? admins : [...admins, consultant], project);
     return new SuccessResponse(true);
   }
 
@@ -236,26 +269,26 @@ export class ProjectController {
     await this.estimateService.updateEstimate(estimate);
 
     const admins = await this.usersService.findSuperAdmins();
-    const contractor = project.contractor ? project.contractor.user : null;
-    await this.notificationService.customerCanceledSiteVisitEvent(admins.find(a => a.id === contractor.id) ? admins : [...admins, contractor], project);
+    const consultant = project.consultant ? project.consultant.user : null;
+    await this.notificationService.customerCanceledSiteVisitEvent(admins.find(a => a.id === consultant.id) ? admins : [...admins, consultant], project);
 
     return new SuccessResponse(true);
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Get(':id/request-review')
   @ApiImplicitParam({ name: 'id', required: true })
   async requestReview(@Param('id') id: string): Promise<SuccessResponse> {
     const project = await this.projectService.findProjectById(id);
-    await this.notificationService.contractorRequestedReviewEvent(project.user, project);
+    await this.notificationService.consultantRequestedReviewEvent(project.user, project);
     return new SuccessResponse(true);
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Post(':id/confirm-government-call')
   @ApiImplicitParam({ name: 'id', required: true })
   confirmGovernmentCall(@Param('id') id: string, @Body() body: ConfirmGovernmentCallDto): Promise<SuccessResponse> {
@@ -265,7 +298,7 @@ export class ProjectController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('all')
-  @Roles([UserRole.Contractor, UserRole.Customer])
+  @Roles([UserRole.Consultant, UserRole.Customer])
   @ApiOkResponse({ type: [Project] })
   async projects(@Query() query: ProjectsPaginationDto, @Request() request): Promise<PaginatorDto<Project>> {
     if (request.user.role === UserRole.Customer) {
@@ -283,11 +316,11 @@ export class ProjectController {
       const [data, count] = await this.projectService.findProjectsByCustomerId(user.customerProfile.id, query.skip || 0, query.take || projectDefaultTakeCount);
       data.forEach(project => project.user = project.customer.user);
       return { data, count };
-    } else if (request.user.role === UserRole.SuperAdmin || request.user.role === UserRole.Contractor) {
-      const contractorId = query.contractorId ? (await this.usersService.findUserById(query.contractorId)).contractorProfile.id : null;
+    } else if (request.user.role === UserRole.SuperAdmin || request.user.role === UserRole.Consultant) {
+      const consultantId = query.consultantId ? (await this.usersService.findUserById(query.consultantId)).consultantProfile.id : null;
       const sortByDateType = query.projectSortByDate || SortByDateType.MostRecent;
       const status = query.status || ProjectStatusFilterType.All;
-      const [data, count] = await this.projectService.findProjects(contractorId, sortByDateType, status, query.projectType, query.skip || 0, query.take || projectDefaultTakeCount);
+      const [data, count] = await this.projectService.findProjects(consultantId, sortByDateType, status, query.projectType, query.skip || 0, query.take || projectDefaultTakeCount);
       data.forEach(project => project.user = project.customer.user);
       return { data, count };
     }
@@ -335,7 +368,7 @@ export class ProjectController {
 
   @Post('register-from-lead/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: () => Project })
   @ApiImplicitParam({ name: 'id', required: true })
   async createProjectFromLead(@Param('id') leadId: string): Promise<Project> {
@@ -364,8 +397,8 @@ export class ProjectController {
   async requestSiteVisitChange(@Param('id') id: string): Promise<SuccessResponse> {
     const project = await this.projectService.findProjectById(id);
     const admins = await this.usersService.findSuperAdmins();
-    const contractor = project.contractor.user;
-    const recipients = admins.find(a => a.id === contractor.id) ? admins : [...admins, contractor];
+    const consultant = project.consultant.user;
+    const recipients = admins.find(a => a.id === consultant.id) ? admins : [...admins, consultant];
     await this.notificationService.customerRequestedPickOutPaversChangeEvent(recipients, project);
     await Promise.all(recipients.map(r => this.emailService.sendPickPaversScheduleChangeRequestEmail(r, project)));
     return new SuccessResponse(true);
@@ -404,11 +437,11 @@ export class ProjectController {
     const ideas = await this.ideaBoardService.findByIds(body.ideas);
     user.ideas = [...user.ideas, ...ideas];
     await this.usersService.updateUser(user);
-    const contractors = await this.usersService.findContractors();
+    const consultants = await this.usersService.findConsultants();
     return Promise.all(body.projects.map(async project => {
       const newProject = await this.projectService.addProject(user.customerProfile, project);
       this.leadService.updateLeadStatusByEmail(user.email, LeadStatus.Processed);
-      await this.notificationService.projectRegisteredEvent(contractors, newProject);
+      await this.notificationService.projectRegisteredEvent(consultants, newProject);
       return newProject;
     }));
   }

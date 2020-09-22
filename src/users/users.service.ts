@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isUUID } from '@nestjs/common/utils/is-uuid';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 
 import { User } from './entities/user.entity';
 import { RegisterUserDto } from './dtos/create-user.dto';
@@ -11,12 +11,13 @@ import { UserRole } from '../common/enums/user-role.enum';
 import { Idea } from '../idea-board/entities/idea.entity';
 import { getFromDto, saveDtoToRepository } from '../common/utils/repository.util';
 import { CustomerProfile } from './entities/customer-profile.entity';
-import { ContractorProfile } from './entities/contractor-profile.entity';
+import { ConsultantProfile } from './entities/consultant-profile.entity';
 import { CustomerDto } from './dtos/customer.dto';
-import { InvitationStatus } from './enums';
+import { ContractorClass, ContractorStatus, InvitationStatus } from './enums';
 import { PatioPackage } from './entities/patio-package.entity';
 import { PatioPackageDto } from './dtos/patio-package.dto';
 import { EmailChangeLink } from './entities/change-email-link.entity';
+import { ContractorProfile } from './entities/contractor-profile.entity';
 
 @Injectable()
 export class UsersService {
@@ -29,6 +30,8 @@ export class UsersService {
     private readonly passwordResetLinksRepository: Repository<PasswordResetLink>,
     @InjectRepository(CustomerProfile)
     private readonly customerRepository: Repository<CustomerProfile>,
+    @InjectRepository(ConsultantProfile)
+    private readonly consultantRepository: Repository<ConsultantProfile>,
     @InjectRepository(ContractorProfile)
     private readonly contractorRepository: Repository<ContractorProfile>,
     @InjectRepository(PatioPackage)
@@ -55,7 +58,9 @@ export class UsersService {
       const profile = new CustomerProfile();
       profile.sourceFoundUs = body.sourceFoundUs;
       user.customerProfile = await this.customerRepository.save(profile);
-    } else if (body.role === UserRole.Contractor || body.role === UserRole.SuperAdmin) {
+    } else if (body.role === UserRole.Consultant || body.role === UserRole.SuperAdmin) {
+      user.consultantProfile = await this.consultantRepository.save(new ConsultantProfile());
+    } else if (body.role === UserRole.Contractor) {
       user.contractorProfile = await this.contractorRepository.save(new ContractorProfile());
     }
     return this.usersRepository.save(user);
@@ -67,17 +72,43 @@ export class UsersService {
     }
     return this.usersRepository.findOne({
       withDeleted: findRemoved,
-      relations: ['ideas', 'customerProfile', 'contractorProfile', 'patioPackage'],
+      relations: ['ideas', 'customerProfile', 'consultantProfile', 'patioPackage'],
       where: { email: email.toLowerCase() },
     });
+  }
+
+  findUserByConsultantId(id: string): Promise<User> {
+    return this.usersRepository.createQueryBuilder('user')
+      .leftJoinAndSelect('user.consultantProfile', 'consultantProfile')
+      .where('consultantProfile.id = :id', { id })
+      .getOne();
   }
 
   findUserById(id: string, findRemoved = false): Promise<User> {
     return this.usersRepository.findOne({
       withDeleted: findRemoved,
-      relations: ['customerProfile', 'contractorProfile', 'patioPackage'],
+      relations: ['customerProfile', 'consultantProfile', 'contractorProfile', 'contractorProfile.portfolios', 'patioPackage'],
       where: { id },
     });
+  }
+
+  findContractorById(id: string): Promise<ContractorProfile> {
+    return this.contractorRepository.findOne({ relations: ['user'], where: { id } });
+  }
+
+  findContractorByStripeAccountId(stripeAccountId: string): Promise<ContractorProfile> {
+    return this.contractorRepository.findOne({ relations: ['user'], where: { stripeAccountId } });
+  }
+
+  findUserByContractorId(id: string): Promise<User> {
+    return this.usersRepository.createQueryBuilder('user')
+      .leftJoinAndSelect('user.contractorProfile', 'contractorProfile')
+      .where('contractorProfile.id = :id', { id })
+      .getOne();
+  }
+
+  updateContractorProfile(contractorProfile: ContractorProfile): Promise<ContractorProfile> {
+    return this.contractorRepository.save(contractorProfile);
   }
 
   findEmailChangeLinkById(id: string): Promise<EmailChangeLink> {
@@ -113,9 +144,30 @@ export class UsersService {
     return this.changeEmailLinkRepository.save(new EmailChangeLink(from, to));
   }
 
-  async findContractors(): Promise<User[]> {
-    const contractors = await this.contractorRepository.find({ relations: ['user'] });
-    return contractors.sort((a, b) => a.user.createdAt > b.user.createdAt ? 1 : -1).map(contractor => contractor.user);
+  findContractors(status: ContractorStatus, contractorClass: ContractorClass, skip: number, take: number): Promise<[ContractorProfile[], number]> {
+    const criteria = {} as any;
+    if (status) { criteria['status'] = status; }
+    if (contractorClass) { criteria['contractorClass'] = contractorClass; }
+    return this.contractorRepository.findAndCount({
+      relations: ['user', 'projects'],
+      where: criteria,
+      skip,
+      take,
+    });
+  }
+
+  findOnboardingContractors(skip: number, take: number): Promise<[ContractorProfile[], number]> {
+    return this.contractorRepository.findAndCount({
+      relations: ['user', 'projects'],
+      where: { status: Not(ContractorStatus.PaymentVerified) },
+      skip,
+      take,
+    });
+  }
+
+  async findConsultants(): Promise<User[]> {
+    const consultants = await this.consultantRepository.find({ relations: ['user'] });
+    return consultants.sort((a, b) => a.user.createdAt > b.user.createdAt ? 1 : -1).map(consultant => consultant.user);
   }
 
   findUsersByKeyword(keyword: string): Promise<User[]> {
@@ -127,13 +179,13 @@ export class UsersService {
       .getMany();
   }
 
-  async findContractorProfiles(): Promise<ContractorProfile[]> {
-    return this.contractorRepository.find();
+  async findConsultantProfiles(): Promise<ConsultantProfile[]> {
+    return this.consultantRepository.find();
   }
 
-  async findContractorProfileByUserId(id: string): Promise<ContractorProfile> {
-    return this.contractorRepository.createQueryBuilder('contractor_profile')
-      .leftJoinAndSelect('contractor_profile.user', 'user')
+  async findConsultantProfileByUserId(id: string): Promise<ConsultantProfile> {
+    return this.consultantRepository.createQueryBuilder('consultant_profile')
+      .leftJoinAndSelect('consultant_profile.user', 'user')
       .where('user.id = :id', { id })
       .getOne();
   }
@@ -228,7 +280,7 @@ export class UsersService {
       throw new BadRequestException('The requested user does not exist.');
     }
     await this.usersRepository.softDelete({ id });
-    await this.contractorRepository.softDelete({ id: user.contractorProfile.id });
+    await this.consultantRepository.softDelete({ id: user.consultantProfile.id });
     return new SuccessResponse(true);
   }
 

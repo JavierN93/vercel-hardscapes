@@ -144,6 +144,7 @@ export enum ProposalStatus {
 export enum MilestoneStatus {
   Pending = 'PENDING',
   ReleaseRequested = 'RELEASE_REQUESTED',
+  ApprovalRequested = 'APPROVAL_REQUESTED',
   Released = 'RELEASED'
 }
 

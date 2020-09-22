@@ -34,7 +34,7 @@ export class LogRocketController {
   @Get('all')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: LogRocketRecording, isArray: true })
   async getRecordings(@Query() query: FilterRecordingDto): Promise<PaginatorDto<LogRocketRecording>> {
     const [data, count] = await this.logRocketService.find(query);
@@ -44,7 +44,7 @@ export class LogRocketController {
   @Post('resolve/:id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiParam({ name: 'id', required: true })
   @ApiOkResponse({ type: LogRocketRecording })
   markRecordAsResolved(@Param('id') id: string): Promise<LogRocketRecording> {
@@ -54,7 +54,7 @@ export class LogRocketController {
   @Post('unresolve/:id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiParam({ name: 'id', required: true })
   @ApiOkResponse({ type: LogRocketRecording })
   markRecordAsUnResolved(@Param('id') id: string): Promise<LogRocketRecording> {

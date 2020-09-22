@@ -10,17 +10,18 @@ import { PasswordResetLink } from './entities/password-reset-link.entity';
 
 import { UsersService } from './users.service';
 import { CustomerProfile } from './entities/customer-profile.entity';
-import { ContractorProfile } from './entities/contractor-profile.entity';
+import { ConsultantProfile } from './entities/consultant-profile.entity';
 import { UsersController } from './users.controller';
 import { PaymentService } from '../payment/payment.service';
 import { PatioPackage } from './entities/patio-package.entity';
 import { EmailChangeLink } from './entities/change-email-link.entity';
+import { ContractorProfile } from './entities/contractor-profile.entity';
 
 @Module({
   imports: [
     IdeaBoardModule,
     EmailModule,
-    TypeOrmModule.forFeature([CustomerProfile, ContractorProfile, User, PasswordResetLink, PatioPackage, EmailChangeLink]),
+    TypeOrmModule.forFeature([CustomerProfile, ConsultantProfile, ContractorProfile, User, PasswordResetLink, PatioPackage, EmailChangeLink]),
   ],
   providers: [UsersService, PaymentService],
   exports: [UsersService],

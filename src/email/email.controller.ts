@@ -19,7 +19,7 @@ export class EmailController {
 
   @Get(':id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'id', required: true })
   @ApiOkResponse({ type: () => EmailEventDto, isArray: true })

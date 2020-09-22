@@ -21,9 +21,10 @@ import { Idea } from '../../idea-board/entities/idea.entity';
 import { UserDto } from '../../auth/dtos/user.dto';
 import { Event } from '../../event/entities/event.entity';
 import { CustomerProfile } from './customer-profile.entity';
-import { ContractorProfile } from './contractor-profile.entity';
+import { ConsultantProfile } from './consultant-profile.entity';
 import { InvitationStatus } from '../enums';
 import { PatioPackage } from './patio-package.entity';
+import { ContractorProfile } from './contractor-profile.entity';
 
 @Entity('user')
 export class User extends SoftDelete {
@@ -106,6 +107,10 @@ export class User extends SoftDelete {
   @JoinColumn()
   customerProfile: CustomerProfile;
 
+  @OneToOne(() => ConsultantProfile, consultant => consultant.user)
+  @JoinColumn()
+  consultantProfile: ConsultantProfile;
+
   @OneToOne(() => ContractorProfile, contractor => contractor.user)
   @JoinColumn()
   contractorProfile: ContractorProfile;
@@ -133,5 +138,9 @@ export class User extends SoftDelete {
       updatedAt: this.updatedAt,
       address: this.address,
     };
+  }
+
+  get fullName(): string {
+    return `${this.firstName} ${this.lastName}`;
   }
 }

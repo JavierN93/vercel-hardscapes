@@ -6,7 +6,6 @@ import { IdeaBoardModule } from '../idea-board/idea-board.module';
 import { ProjectModule } from '../project/project.module';
 
 import { SeedService } from './seed.service';
-import { NetworkContractorModule } from '../network-contractor/network-contractor.module';
 
 @Module({
   providers: [
@@ -17,7 +16,6 @@ import { NetworkContractorModule } from '../network-contractor/network-contracto
     JobsModule,
     IdeaBoardModule,
     ProjectModule,
-    NetworkContractorModule,
   ],
 })
 export class SeedModule {

@@ -6,7 +6,7 @@ import { Estimate } from './entities/estimate.entity';
 import { EstimateItem } from './entities/estimate-item.entity';
 import { Project } from '../entities/project.entity';
 import { Schedule } from '../../schedule/entities/schedule.entity';
-import { ContractorProfile } from '../../users/entities/contractor-profile.entity';
+import { ConsultantProfile } from '../../users/entities/consultant-profile.entity';
 import { EstimateDto } from './dto/estimate.dto';
 import { getFromDto } from '../../common/utils/repository.util';
 import { SuccessResponse } from '../../common/models/success-response';
@@ -46,7 +46,7 @@ export class EstimateService {
     return this.estimateRepository.save(estimate);
   }
 
-  async saveEstimate(project: Project, body: EstimateDto, contractor: ContractorProfile): Promise<Estimate> {
+  async saveEstimate(project: Project, body: EstimateDto, consultant: ConsultantProfile): Promise<Estimate> {
     const estimate = getFromDto<Estimate>(body, new Estimate());
     project.estimate = await this.estimateRepository.save(estimate);
     const items = body.items.map(item => {
@@ -63,7 +63,7 @@ export class EstimateService {
         return t;
       }));
     }
-    project.contractor = contractor;
+    project.consultant = consultant;
     await this.projectRepository.save(project);
     return this.findEstimateFromProjectId(project.id);
   }
@@ -72,7 +72,7 @@ export class EstimateService {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 2); // 48 hours
     return this.scheduleRepository.find({
-      relations: ['estimate', 'estimate.project', 'estimate.project.customer', 'estimate.project.customer.user', 'estimate.project.contractor', 'estimate.project.contractor.user'],
+      relations: ['estimate', 'estimate.project', 'estimate.project.customer', 'estimate.project.customer.user', 'estimate.project.consultant', 'estimate.project.consultant.user'],
       where: {
         selected: true,
         reminderSent: false,

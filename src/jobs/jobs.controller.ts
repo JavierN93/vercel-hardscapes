@@ -36,7 +36,7 @@ export class JobsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Post()
   @ApiOkResponse({ type: Job })
   createJob(@Body() body: AddJobDto): Promise<Job> {
@@ -45,7 +45,7 @@ export class JobsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Get('applicant/all')
   @ApiOkResponse({ type: Applicant, isArray: true })
   async getApplicants(@Query() query: PaginationDto): Promise<PaginatorDto<Applicant>> {
@@ -55,7 +55,7 @@ export class JobsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Post('applicant/:applicantId/decline')
   @ApiParam({ name: 'applicantId', required: true })
   @ApiOkResponse({ type: SuccessResponse })
@@ -72,7 +72,7 @@ export class JobsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Put(':jobId')
   @ApiParam({ name: 'jobId', required: true })
   @ApiOkResponse({ type: Job })
@@ -82,7 +82,7 @@ export class JobsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @Delete(':jobId')
   @ApiParam({ name: 'jobId', required: true })
   @ApiOkResponse({ type: SuccessResponse })

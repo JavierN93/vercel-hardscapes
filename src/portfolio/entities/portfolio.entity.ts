@@ -1,37 +1,28 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 import { SoftDelete } from '../../common/core/soft-delete';
-import { MaterialType } from '../../idea-board/enums';
 import { PortfolioDto } from '../dtos/portfolio.dto';
+import { ContractorProfile } from '../../users/entities/contractor-profile.entity';
 
 @Entity('portfolio')
 export class Portfolio extends SoftDelete {
   @Column({ default: '' })
   name: string;
 
-  @Column({ type: 'enum', enum: MaterialType, array: true })
-  materials: MaterialType[];
-
-  @Column({ default: '' })
-  address: string;
-
-  @Column({ default: '' })
-  email: string;
-
-  @Column({ default: '' })
-  phone: string;
-
   @Column({ default: '' })
   comment: string;
+
+  @Column({ type: 'text', array: true, default: '{}' })
+  attachments: string[];
+
+  @ManyToOne(() => ContractorProfile, contractor => contractor.portfolios)
+  contractorProfile: ContractorProfile;
 
   toDto(): PortfolioDto {
     return {
       name: this.name,
-      address: this.address,
-      email: this.email,
-      materials: this.materials,
-      phone: this.phone,
       comment: this.comment,
+      attachments: this.attachments,
     };
   }
 }

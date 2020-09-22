@@ -1,11 +1,24 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { ContractorController } from './contractor.controller';
 import { UsersModule } from '../users/users.module';
+import { PortfolioModule } from '../portfolio/portfolio.module';
+import { EmailModule } from '../email/email.module';
+import { NotificationModule } from '../notification/notification.module';
+import { ContractorController } from './contractor.controller';
+import { ContractorService } from './contractor.service';
+import { ContractorProfile } from '../users/entities/contractor-profile.entity';
 
 @Module({
-  imports: [UsersModule],
   controllers: [ContractorController],
+  imports: [
+    TypeOrmModule.forFeature([ContractorProfile]),
+    EmailModule,
+    UsersModule,
+    PortfolioModule,
+    NotificationModule,
+  ],
+  providers: [ContractorService],
 })
 export class ContractorModule {
 }

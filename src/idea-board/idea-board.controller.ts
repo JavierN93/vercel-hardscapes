@@ -53,7 +53,7 @@ export class IdeaBoardController {
   @Get('customer/:userId')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiImplicitParam({ name: 'userId', required: true })
   @ApiOkResponse({ type: IdeaDto, isArray: true })
   async getIdeaBoardItemsByCustomerId(@Param('userId') userId, @Query() query: AllIdeaBoardQueryDto): Promise<IdeaDto[]> {
@@ -134,7 +134,7 @@ export class IdeaBoardController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'id', required: true })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: Idea })
   update(@Param('id') id, @Body() body: UpdateIdeaBoardDto): Promise<Idea> {
     return this.ideaBoardService.updateIdeaBoardItem(id, body);
@@ -144,7 +144,7 @@ export class IdeaBoardController {
   @ApiBearerAuth()
   @ApiImplicitParam({ name: 'id', required: true })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: SuccessResponse })
   deleteIdea(@Param('id') id): Promise<SuccessResponse> {
     return this.ideaBoardService.deleteIdeaBoardItem(id);

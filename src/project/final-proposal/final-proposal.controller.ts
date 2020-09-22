@@ -90,7 +90,7 @@ export class FinalProposalController {
     if (estimate.status !== EstimateStatus.SiteVisitScheduled) {
       throw new BadRequestException('Final proposal can only be made for accepted estimates.');
     }
-    if (request.user.role !== UserRole.SuperAdmin && project.contractor.user.id !== request.user.id) {
+    if (request.user.role !== UserRole.SuperAdmin && project.consultant.user.id !== request.user.id) {
       throw new BadRequestException('This project is not assigned to you.');
     }
     if (body.id === '') {
@@ -155,8 +155,8 @@ export class FinalProposalController {
       }
       await this.finalProposalService.updateProposal(proposal);
       const admins = await this.usersService.findSuperAdmins();
-      const contractor = project.contractor ? project.contractor.user : null;
-      await this.notificationService.finalProposalStatusChangedEvent(admins.find(a => a.id === contractor.id) ? admins : [...admins, contractor], proposal);
+      const consultant = project.consultant ? project.consultant.user : null;
+      await this.notificationService.finalProposalStatusChangedEvent(admins.find(a => a.id === consultant.id) ? admins : [...admins, consultant], proposal);
       return this.finalProposalService.findProposalFromProjectId(project.id);
     } else if (proposal.status === status) {
       return this.finalProposalService.findProposalFromProjectId(project.id);

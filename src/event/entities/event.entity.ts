@@ -12,7 +12,7 @@ export class Event extends SoftDelete {
   user: User;
 
   @ApiProperty({ enum: EventType })
-  @Column({ enum: EventType })
+  @Column({ type: 'enum', enum: EventType })
   type: EventType;
 
   @ApiProperty()

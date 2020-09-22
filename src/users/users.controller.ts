@@ -1,5 +1,17 @@
-import { BadRequestException, Body, Controller, Delete, Param, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
@@ -13,6 +25,7 @@ import { InviteUserDto } from './dtos/invite-user.dto';
 import { EmailService } from '../email/email.service';
 import { generateRandomPassword } from '../common/utils/string.util';
 import { ChangeEmailDto } from './dtos/change-email.dto';
+import { User } from './entities/user.entity';
 
 @ApiTags('User Management')
 @ApiBearerAuth()
@@ -24,6 +37,20 @@ export class UsersController {
     private usersService: UsersService,
     private emailService: EmailService,
   ) {
+  }
+
+  @Get(':id')
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: () => User })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.Consultant])
+  @ApiImplicitParam({ name: 'id', required: true })
+  async getUser(@Param('id') userId: string): Promise<User> {
+    const found = await this.usersService.findUserById(userId);
+    if (!found) {
+      throw new NotFoundException();
+    }
+    return found;
   }
 
   @Put(':id/change-role')
@@ -41,7 +68,7 @@ export class UsersController {
 
   @Put(':id/change-email')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Contractor])
+  @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: () => SuccessResponse })
   @ApiParam({ name: 'id', required: true })
   async changeEmail(@Param('id') id: string, @Body() body: ChangeEmailDto) {
@@ -69,7 +96,13 @@ export class UsersController {
       throw new BadRequestException('The email address is already in use.');
     }
     const password = generateRandomPassword();
-    const added = await this.usersService.addUser({ ...dto, password, ideas: [] });
+    const added = await this.usersService.addUser({
+      ...dto,
+      firstName: dto.firstName || '',
+      lastName: dto.lastName || '',
+      phone: dto.phone || '',
+      password, ideas: []
+    });
     await this.emailService.sendInvitationEmail(added, password);
     return added.toUserDto();
   }

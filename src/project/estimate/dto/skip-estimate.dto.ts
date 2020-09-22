@@ -4,7 +4,7 @@ import { IsUUID } from 'class-validator';
 export class SkipEstimateDto {
   @ApiProperty()
   @IsUUID()
-  contractorUserId: string;
+  consultantUserId: string;
 
   @ApiProperty({ type: Date, required: true })
   siteVisitDateFrom: Date;

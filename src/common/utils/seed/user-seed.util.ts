@@ -15,7 +15,7 @@ const admins = [
   { email: 'admin.admin1', firstName: 'Joseph', lastName: 'Masciovechio' },
 ];
 
-const contractors = [
+const consultants = [
   { email: 'smith', firstName: 'Smith', lastName: 'James' },
   { email: 'johnson', firstName: 'Johnson', lastName: 'John' },
   { email: 'williams', firstName: 'Williams', lastName: 'Robert' },
@@ -42,14 +42,14 @@ export function generateAccount(email: string, firstName: string, lastName: stri
   };
 }
 
-export function generateContractorAccount(count = 1) {
+export function generateConsultantAccount(count = 1) {
   const ary = [];
   for (let i = 0; i < count; i++) {
-    const firstName = i < contractors.length ? contractors[i].firstName : Faker.name.firstName();
-    const lastName = i < contractors.length ? contractors[i].lastName : Faker.name.lastName();
-    const mailName = i < contractors.length ? contractors[i].email : firstName;
-    const email = `contractor${i + 1}.${mailName}@${companyMailDomain}`;
-    ary.push(generateAccount(email, firstName, lastName, Faker.phone.phoneNumber(), UserRole.Contractor));
+    const firstName = i < consultants.length ? consultants[i].firstName : Faker.name.firstName();
+    const lastName = i < consultants.length ? consultants[i].lastName : Faker.name.lastName();
+    const mailName = i < consultants.length ? consultants[i].email : firstName;
+    const email = `consultant${i + 1}.${mailName}@${companyMailDomain}`.toLowerCase();
+    ary.push(generateAccount(email, firstName, lastName, Faker.phone.phoneNumber(), UserRole.Consultant));
   }
   return ary;
 }

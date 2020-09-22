@@ -26,11 +26,19 @@ export enum EmailType {
   ReceivedFinalMilestoneWithHold = 'RECEIVED_FINAL_MILESTONE_WITH_HOLD',
 
 // contractor emails
+  LegalTermsSignReminder = 'LEGAL_TERMS_SIGN_REMINDER',
+  PaymentSetupReminder = 'PAYMENT_SETUP_REMINDER',
+  InvitedToProject = 'INVITED_TO_PROJECT',
+  ContractorInvitation = 'CONTRACTOR_INVITATION',
+  ReceivedSubContractMilestonePayment = 'RECEIVED_SUB_CONTRACT_MILESTONE_PAYMENT',
+  SitePlanUpdated = 'SITE_PLAN_UPDATED',
+
+// consultant emails
   NewProjectRegistered = 'NEW_PROJECT_REGISTERED',
   EstimateReminder = 'ESTIMATE_REMINDER',
   EstimateAccepted = 'ESTIMATE_ACCEPTED',
-  SiteVisitReminderForContractor = 'SITE_VISIT_REMINDER_FOR_CONTRACTOR', // TODO: add email template
-  FinalProposalReminder = 'SUBMIT_PROPOSAL_REMINDER', // TODO: add email template
+  SiteVisitReminderForConsultant = 'SITE_VISIT_REMINDER_FOR_CONSULTANT',
+  FinalProposalReminder = 'SUBMIT_PROPOSAL_REMINDER',
   DepositMade = 'DEPOSIT_MADE',
   MilestonePaid = 'MILESTONE_PAID',
   ContractReady = 'CONTRACT_READY',
@@ -39,6 +47,12 @@ export enum EmailType {
   PickPaversScheduleChangeRequest = 'PICK_PAVERS_SCHEDULE_CHANGE_REQUEST',
   EstimateDeclined = 'ESTIMATE_DECLINED',
   FinalProposalDeclined = 'FINAL_PROPOSAL_DECLINED',
+  SubContractAccepted = 'SUB_CONTRACT_ACCEPTED',
+  SubContractDeclined = 'SUB_CONTRACT_DECLINED',
+  ContractorRequestedMilestonePayment = 'CONTRACTOR_REQUESTED_MILESTONE_PAYMENT',
+  SubContractCompleted = 'SUB_CONTRACT_COMPLETED',
+  ContractorUpdatedProfile = 'CONTRACTOR_UPDATED_PROFILE',
+  ConsultantRequestedMilestonePayment = 'CONSULTANT_REQUESTED_MILESTONE_PAYMENT',
 
   ChangeEmail = 'CHANGE_EMAIL',
 }

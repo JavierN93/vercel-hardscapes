@@ -24,6 +24,8 @@ import { EmailEventDto } from './dtos/email-event.dto';
 import { SendGridEmailStatusDto } from './dtos/send-grid-email-status.dto';
 import { EmailEventType } from './enums';
 import { MilestoneType } from '../payment/enums';
+import { UserRole } from '../common/enums/user-role.enum';
+import { SubContract } from '../project/sub-contract/entities/sub-contract.entity';
 import { globalConfig } from '../config';
 
 @Injectable()
@@ -93,7 +95,7 @@ export class EmailService {
   }
 
   async sendInvitationEmail(user: User, tempPassword: string): Promise<boolean> {
-    return this.sendMail(EmailType.Invitation, user.email, {
+    return this.sendMail(user.role === UserRole.Contractor ? EmailType.ContractorInvitation : EmailType.Invitation, user.email, {
       tempPassword,
       name: `${user.firstName} ${user.lastName}`,
       passwordResetLink: `${process.env.PRODUCTION_HOST}/invite/${user.id}`,
@@ -102,7 +104,7 @@ export class EmailService {
   }
 
   async sendSiteVisitRequestProposalEmail(customerName: string, date: Date, project: Project): Promise<boolean> {
-    const user = project.contractor.user;
+    const user = project.consultant.user;
     const siteVisitDate = convertUtcToEstString(new Date(date));
     const confirmVisitLink = this.makeRedirectLink(user, `admin/projects/${project.id}/estimate`);
     const rescheduleLink = this.makeRedirectLink(user, `admin/projects/${project.id}/estimate`);
@@ -116,11 +118,11 @@ export class EmailService {
   }
 
   async sendDepositMadeEmail(project: Project): Promise<boolean> {
-    const contractor = project.contractor.user;
+    const consultant = project.consultant.user;
     const customer = project.user;
-    const sendMessageLink = this.makeRedirectLink(contractor, `admin/inbox/cover`);
-    return this.sendMail(EmailType.DepositMade, contractor.email, {
-      name: `${contractor.firstName} ${contractor.lastName}`,
+    const sendMessageLink = this.makeRedirectLink(consultant, `admin/inbox/cover`);
+    return this.sendMail(EmailType.DepositMade, consultant.email, {
+      name: `${consultant.firstName} ${consultant.lastName}`,
       customerName: `${customer.firstName} ${customer.lastName}`,
       sendMessageLink,
     }, project);
@@ -128,11 +130,11 @@ export class EmailService {
 
   async sendMilestonePaidEmail(project: Project): Promise<boolean> {
     const { id: projectId, user: customer } = project;
-    const contractor = project.contractor.user;
-    const name = `${contractor.firstName} ${contractor.lastName}`;
+    const consultant = project.consultant.user;
+    const name = `${consultant.firstName} ${consultant.lastName}`;
     const customerName = `${customer.firstName} ${customer.lastName}`;
-    const paymentLink = this.makeRedirectLink(contractor, `admin/projects/${projectId}/management`);
-    return this.sendMail(EmailType.MilestonePaid, contractor.email, { name, customerName, paymentLink }, project);
+    const paymentLink = this.makeRedirectLink(consultant, `admin/projects/${projectId}/management`);
+    return this.sendMail(EmailType.MilestonePaid, consultant.email, { name, customerName, paymentLink }, project);
   }
 
   async sendVerificationEmail(user: User): Promise<boolean> {
@@ -198,6 +200,24 @@ export class EmailService {
     return this.sendMail(EmailType.ChangeEmail, targetEmail, {
       name,
       verifyChangeEmailLink,
+    });
+  }
+
+  async sendLegalTermsSignReminderEmail(user: User): Promise<boolean> {
+    const name = `${user.firstName} ${user.lastName}`;
+    const legalTermsPageLink = this.makeRedirectLink(user, `${process.env.PRODUCTION_HOST}/contractor/onboarding/legal`);
+    return this.sendMail(EmailType.LegalTermsSignReminder, user.email, {
+      name,
+      legalTermsPageLink,
+    });
+  }
+
+  async sendPaymentSetupReminderEmail(user: User): Promise<boolean> {
+    const name = `${user.firstName} ${user.lastName}`;
+    const paymentSetupPageLink = `${process.env.PRODUCTION_HOST}/contractor/onboarding/payment-setup`;
+    return this.sendMail(EmailType.PaymentSetupReminder, user.email, {
+      name,
+      paymentSetupPageLink,
     });
   }
 
@@ -362,12 +382,12 @@ export class EmailService {
   }
 
   async sendEstimateDeclinedEmail(project: Project, estimate: Estimate): Promise<boolean> {
-    const contractor = project.contractor.user;
+    const consultant = project.consultant.user;
     const customer = project.customer.user;
-    const projectLink = this.makeRedirectLink(contractor, `admin/projects/${project.id}`);
+    const projectLink = this.makeRedirectLink(consultant, `admin/projects/${project.id}`);
     const reasons = estimate.declineReasons.map(reason => declineReasonTexts[reason]).join('<br>');
-    return this.sendMail(EmailType.EstimateDeclined, contractor.email, {
-      name: `${contractor.firstName} ${contractor.lastName}`,
+    return this.sendMail(EmailType.EstimateDeclined, consultant.email, {
+      name: `${consultant.firstName} ${consultant.lastName}`,
       customerName: `${customer.firstName} ${customer.lastName}`,
       projectName: project.name,
       projectLink,
@@ -376,12 +396,12 @@ export class EmailService {
   }
 
   async sendFinalProposalDeclinedEmail(project: Project, proposal: FinalProposal): Promise<boolean> {
-    const contractor = project.contractor.user;
+    const consultant = project.consultant.user;
     const customer = project.customer.user;
-    const projectLink = this.makeRedirectLink(contractor, `admin/projects/${project.id}`);
+    const projectLink = this.makeRedirectLink(consultant, `admin/projects/${project.id}`);
     const reasons = proposal.declineReasons.map(reason => declineReasonTexts[reason]).join('<br>');
-    return this.sendMail(EmailType.FinalProposalDeclined, contractor.email, {
-      name: `${contractor.firstName} ${contractor.lastName}`,
+    return this.sendMail(EmailType.FinalProposalDeclined, consultant.email, {
+      name: `${consultant.firstName} ${consultant.lastName}`,
       customerName: `${customer.firstName} ${customer.lastName}`,
       projectName: project.name,
       projectLink,
@@ -428,6 +448,97 @@ export class EmailService {
       projectName,
       contractLink,
     }, project);
+  }
+
+  async sendInvitedToProjectEmail(user: User, project: Project): Promise<boolean> {
+    const projectId = project.id;
+    const projectLink = this.makeRedirectLink(user, `contractor/projects/${projectId}/invitation`);
+    return this.sendMail(EmailType.InvitedToProject, user.email, {
+      name: user.fullName,
+      projectLink,
+    }, project);
+  }
+
+  async sendSitePlanUpdatedEmail(user: User, project: Project): Promise<boolean> {
+    const projectId = project.id;
+    const projectLink = this.makeRedirectLink(user, `contractor/projects/${projectId}/invitation`);
+    return this.sendMail(EmailType.SitePlanUpdated, user.email, {
+      name: user.fullName,
+      projectLink,
+    }, project);
+  }
+
+  async sendReceivedSubContractMilestonePaymentEmail(user: User, project: Project): Promise<boolean> {
+    const projectId = project.id;
+    const paymentLink = this.makeRedirectLink(user, `contractor/projects/${projectId}/manage-project`);
+    return this.sendMail(EmailType.ReceivedSubContractMilestonePayment, user.email, {
+      name: user.fullName,
+      paymentLink
+    });
+  }
+
+  async sendSubContractAcceptedEmail(user: User, project: Project, subContrat: SubContract, contractorUser: User): Promise<boolean> {
+    const { id: projectId, name: projectName } = project;
+    const projectLink = this.makeRedirectLink(user, `admin/projects/${projectId}/sub-contract/${subContrat.id}/manage-project`);
+    return this.sendMail(EmailType.SubContractAccepted, user.email, {
+      name: user.fullName,
+      contractorName: contractorUser.fullName,
+      projectName,
+      projectLink,
+    });
+  }
+
+  async sendSubContractDeclinedEmail(user: User, project: Project, subContract: SubContract, contractorUser: User): Promise<boolean> {
+    const { id: projectId, name: projectName } = project;
+    const projectLink = this.makeRedirectLink(user, `admin/projects/${projectId}/sub-contract/select-contractor`);
+    return this.sendMail(EmailType.SubContractDeclined, user.email, {
+      name: user.fullName,
+      contractorName: contractorUser.fullName,
+      projectName,
+      projectLink,
+    });
+  }
+
+  async sendContractorRequestedMilestonePaymentEmail(user: User, project: Project, subContract: SubContract, contractorUser: User): Promise<boolean> {
+    const { id: projectId, name: projectName } = project;
+    const projectLink = this.makeRedirectLink(user, `admin/projects/${projectId}/sub-contract/${subContract.id}/manage-project`);
+    return this.sendMail(EmailType.ContractorRequestedMilestonePayment, user.email, {
+      name: user.fullName,
+      contractorName: contractorUser.fullName,
+      projectName,
+      projectLink,
+    });
+  }
+
+  async sendConsultantRequestedMilestonePaymentEmail(user: User, project: Project, subContract: SubContract, consultantUser: User): Promise<boolean> {
+    const { id: projectId, name: projectName } = project;
+    const projectLink = this.makeRedirectLink(user, `admin/projects/${projectId}/sub-contract/${subContract.id}/manage-project`);
+    return this.sendMail(EmailType.ConsultantRequestedMilestonePayment, user.email, {
+      name: user.fullName,
+      consultantName: consultantUser.fullName,
+      projectName,
+      projectLink,
+    });
+  }
+
+  async sendSubContractCompletedEmail(user: User, project: Project, subContract: SubContract, contractorUser: User): Promise<boolean> {
+    const { id: projectId, name: projectName } = project;
+    const projectLink = this.makeRedirectLink(user, `admin/projects/${projectId}/sub-contract/${subContract.id}/manage-project`);
+    return this.sendMail(EmailType.SubContractCompleted, user.email, {
+      name: user.fullName,
+      contractorName: contractorUser.fullName,
+      projectName,
+      projectLink,
+    });
+  }
+
+  async sendContractorUpdatedProfileEmail(user: User, contractorUser: User): Promise<boolean> {
+    const contractorLink = this.makeRedirectLink(user, `admin/contractors/${contractorUser.id}/basic-profile`);
+    return this.sendMail(EmailType.ContractorUpdatedProfile, user.email, {
+      name: user.fullName,
+      contractorName: contractorUser.fullName,
+      contractorLink,
+    });
   }
 
   async sendMail(code: EmailType, recipient: string, substitutes: any, project?: Project, from?: string): Promise<boolean> {
