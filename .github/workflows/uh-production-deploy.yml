@@ -47,7 +47,7 @@ jobs:
         hosts: ${{secrets.UH_USER}}@${{secrets.UH_HOST}}
         privateKey: ${{ secrets.UH_KEY }}
         debug: false
-        command: /home/ubuntu/jobs/uh-deploy.sh
+        command: /home/ubuntu/jobs/deploy-uh.sh
 
     - name: Slack Notify
       uses: 8398a7/action-slack@v3

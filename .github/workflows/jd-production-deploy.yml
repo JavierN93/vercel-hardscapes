@@ -47,7 +47,7 @@ jobs:
         hosts: ${{secrets.JD_USER}}@${{secrets.JD_HOST}}
         privateKey: ${{ secrets.JD_KEY }}
         debug: false
-        command: /home/ubuntu/jobs/jd-deploy.sh
+        command: /home/ubuntu/jobs/deploy-jd.sh
 
     - name: Slack Notify
       uses: 8398a7/action-slack@v3
