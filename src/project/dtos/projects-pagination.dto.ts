@@ -9,7 +9,7 @@ export class ProjectsPaginationDto extends PaginationDto {
   consultantId: string;
 
   @ApiProperty({ enum: SortByDateType, required: false })
-  projectSortByDate: SortByDateType;
+  sortByDate: SortByDateType;
 
   @ApiProperty({ enum: ProjectStatusFilterType, required: false })
   status: ProjectStatusFilterType;

@@ -318,7 +318,7 @@ export class ProjectController {
       return { data, count };
     } else if (request.user.role === UserRole.SuperAdmin || request.user.role === UserRole.Consultant) {
       const consultantId = query.consultantId ? (await this.usersService.findUserById(query.consultantId)).consultantProfile.id : null;
-      const sortByDateType = query.projectSortByDate || SortByDateType.MostRecent;
+      const sortByDateType = query.sortByDate || SortByDateType.MostRecent;
       const status = query.status || ProjectStatusFilterType.All;
       const [data, count] = await this.projectService.findProjects(consultantId, sortByDateType, status, query.projectType, query.skip || 0, query.take || projectDefaultTakeCount);
       data.forEach(project => project.user = project.customer.user);
