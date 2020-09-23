@@ -44,8 +44,6 @@ export class SitePlanDto {
   @IsNotEmpty()
   endDate: Date;
 
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  comment: string;
+  @ApiProperty({ required: false })
+  comment?: string;
 }
