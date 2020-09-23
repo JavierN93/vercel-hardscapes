@@ -110,7 +110,7 @@ export class EmailService {
     const confirmVisitLink = this.makeRedirectLink(user, `admin/projects/${project.id}/estimate`);
     const rescheduleLink = this.makeRedirectLink(user, `admin/projects/${project.id}/estimate`);
     return this.sendMail(EmailType.EstimateAccepted, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       customerName,
       siteVisitDate,
       confirmVisitLink,
@@ -123,7 +123,7 @@ export class EmailService {
     const customer = project.user;
     const sendMessageLink = this.makeRedirectLink(consultant, `admin/inbox/cover`);
     return this.sendMail(EmailType.DepositMade, consultant.email, {
-      name: `${consultant.firstName} ${consultant.lastName}`,
+      name: consultant.firstName,
       customerName: `${customer.firstName} ${customer.lastName}`,
       sendMessageLink,
     }, project);
@@ -132,7 +132,7 @@ export class EmailService {
   async sendMilestonePaidEmail(project: Project): Promise<boolean> {
     const { id: projectId, user: customer } = project;
     const consultant = project.consultant.user;
-    const name = `${consultant.firstName} ${consultant.lastName}`;
+    const name = consultant.firstName;
     const customerName = `${customer.firstName} ${customer.lastName}`;
     const paymentLink = this.makeRedirectLink(consultant, `admin/projects/${projectId}/management`);
     return this.sendMail(EmailType.MilestonePaid, consultant.email, { name, customerName, paymentLink }, project);
@@ -141,13 +141,13 @@ export class EmailService {
   async sendVerificationEmail(user: User): Promise<boolean> {
     return this.sendMail(EmailType.ConfirmRegister, user.email, {
       activateLink: `${process.env.PRODUCTION_HOST}/verify/${user.id}`,
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
     });
   }
 
   async sendResetPasswordEmail(user: User, resetToken: string): Promise<boolean> {
     return this.sendMail(EmailType.PasswordReset, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       passwordResetLink: `${process.env.PRODUCTION_HOST}/reset-password/${resetToken}`,
       linkExpireHours: resetPasswordLinkExpireHours,
     });
@@ -167,7 +167,7 @@ export class EmailService {
 
   async sendConsultationEmail(user: User): Promise<boolean> {
     return this.sendMail(EmailType.ProjectCreated, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
     });
   }
 
@@ -176,7 +176,7 @@ export class EmailService {
     const user = project.customer.user;
     const estimateLink = this.makeRedirectLink(user, `app/project/${siteVisitSchedule.estimate.project.id}/estimate`);
     return this.sendMail(EmailType.SiteVisitScheduleChanged, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       siteVisitDate: convertUtcToEstString(new Date(siteVisitSchedule.from)),
       projectName: siteVisitSchedule.estimate.project.name,
       estimateLink,
@@ -188,7 +188,7 @@ export class EmailService {
     const user = project.customer.user;
     const projectLink = this.makeRedirectLink(user, `app/project/${schedule.project.id}/management`);
     return this.sendMail(EmailType.PickPaversScheduleChanged, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       scheduleDate: convertUtcToEstString(new Date(schedule.from)),
       projectName: schedule.project.name,
       projectLink,
@@ -196,7 +196,7 @@ export class EmailService {
   }
 
   async sendEmailChangedEmail(user: User, targetEmail: string, linkId: string): Promise<boolean> {
-    const name = `${user.firstName} ${user.lastName}`;
+    const name = user.firstName;
     const verifyChangeEmailLink = `${process.env.PRODUCTION_HOST}/verify-email-change/${linkId}`;
     return this.sendMail(EmailType.ChangeEmail, targetEmail, {
       name,
@@ -205,7 +205,7 @@ export class EmailService {
   }
 
   async sendLegalTermsSignReminderEmail(user: User): Promise<boolean> {
-    const name = `${user.firstName} ${user.lastName}`;
+    const name = user.firstName;
     const legalTermsPageLink = this.makeRedirectLink(user, `${process.env.PRODUCTION_HOST}/contractor/onboarding/legal`);
     return this.sendMail(EmailType.LegalTermsSignReminder, user.email, {
       name,
@@ -214,7 +214,7 @@ export class EmailService {
   }
 
   async sendPaymentSetupReminderEmail(user: User): Promise<boolean> {
-    const name = `${user.firstName} ${user.lastName}`;
+    const name = user.firstName;
     const paymentSetupPageLink = `${process.env.PRODUCTION_HOST}/contractor/onboarding/payment-setup`;
     return this.sendMail(EmailType.PaymentSetupReminder, user.email, {
       name,
@@ -226,7 +226,7 @@ export class EmailService {
     const { user, id: projectId } = project;
     const estimateLink = this.makeRedirectLink(user, `app/project/${projectId}/estimate`);
     return this.sendMail(EmailType.EstimateReady, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       estimateLink,
     }, project);
   }
@@ -235,7 +235,7 @@ export class EmailService {
     const { user, id: projectId } = project;
     const estimateLink = this.makeRedirectLink(user, `app/project/${projectId}/estimate`);
     return this.sendMail(EmailType.EstimateUpdated, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       estimateLink,
     }, project);
   }
@@ -245,7 +245,7 @@ export class EmailService {
     const siteVisitDate = convertUtcToEstString(new Date(date));
     const projectLink = this.makeRedirectLink(user, `app/project/${projectId}/estimate`);
     return this.sendMail(EmailType.SiteVisitScheduled, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       siteVisitDate,
       projectLink,
     }, project);
@@ -255,7 +255,7 @@ export class EmailService {
     const { user, id: projectId } = project;
     const finalProposalLink = this.makeRedirectLink(user, `app/project/${projectId}/proposal`);
     return this.sendMail(EmailType.ReceivedFinalProposal, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       finalProposalLink,
     }, project);
   }
@@ -264,7 +264,7 @@ export class EmailService {
     const { user, id: projectId } = project;
     const finalProposalLink = this.makeRedirectLink(user, `app/project/${projectId}/proposal`);
     return this.sendMail(EmailType.FinalProposalUpdated, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       finalProposalLink,
     }, project);
   }
@@ -273,7 +273,7 @@ export class EmailService {
     const { user, id: projectId } = project;
     const projectLink = this.makeRedirectLink(user, `app/project/${projectId}/management`);
     return this.sendMail(EmailType.FinalProposalAccepted, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       projectLink,
     }, project);
   }
@@ -283,7 +283,7 @@ export class EmailService {
     const loginLink = `${process.env.PRODUCTION_HOST}/login`;
     const projectLink = this.makeRedirectLink(user, `app/project/${projectId}/management`);
     return this.sendMail(EmailType.MilestonePaymentRequested, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       loginLink,
       projectLink,
     }, project);
@@ -293,7 +293,7 @@ export class EmailService {
     const { user, id: projectId } = project;
     const projectLink = this.makeRedirectLink(user, `app/project/${projectId}/management`);
     return this.sendMail(EmailType.ReceivedMilestonePayment, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       projectLink,
     }, project);
   }
@@ -304,7 +304,7 @@ export class EmailService {
     const projectLink = this.makeRedirectLink(user, `app/project/${projectId}/management`);
     const holdAmount = holdMilestone.amount;
     return this.sendMail(EmailType.ReceivedFinalMilestoneWithHold, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       projectLink,
       holdAmount,
     }, project);
@@ -315,7 +315,7 @@ export class EmailService {
     const loginLink = `${process.env.PRODUCTION_HOST}/login`;
     const paymentLink = this.makeRedirectLink(user, `app/project/${projectId}/management`);
     return this.sendMail(EmailType.FinalMilestonePaymentRequested, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       loginLink,
       paymentLink,
     }, project);
@@ -325,7 +325,7 @@ export class EmailService {
     const user = project.user;
     const projectLink = this.makeRedirectLink(user, `app/project/${project.id}/management`);
     return this.sendMail(EmailType.PickPaversScheduled, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       projectLink,
     }, project);
   }
@@ -335,7 +335,7 @@ export class EmailService {
     const loginLink = `${process.env.PRODUCTION_HOST}/login`;
     const paymentLink = this.makeRedirectLink(user, `app/project/${projectId}/management`);
     return this.sendMail(EmailType.FinalMilestoneModified, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       loginLink,
       paymentLink,
     }, project);
@@ -346,7 +346,7 @@ export class EmailService {
     const loginLink = `${process.env.PRODUCTION_HOST}/login`;
     const paymentLink = this.makeRedirectLink(user, `app/project/${projectId}/management`);
     return this.sendMail(EmailType.DepositMilestoneUpdated, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       loginLink,
       paymentLink,
     }, project);
@@ -356,7 +356,7 @@ export class EmailService {
     const user = project.user;
     const reviewLink = process.env.GOOGLE_REVIEW_URL;
     return this.sendMail(EmailType.TestimonialRequest, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       reviewLink,
     }, project);
   }
@@ -365,7 +365,7 @@ export class EmailService {
     const customer = project.customer.user;
     const estimateLink = this.makeRedirectLink(user, `admin/projects/${project.id}`);
     return this.sendMail(EmailType.EstimateReminder, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       customerName: `${customer.firstName} ${customer.lastName}`,
       estimateLink,
     }, project);
@@ -375,7 +375,7 @@ export class EmailService {
     const customer = project.customer.user;
     const projectLink = this.makeRedirectLink(user, `admin/projects/${project.id}/estimate`);
     return this.sendMail(EmailType.SiteVisitScheduleChangeRequest, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       customerName: `${customer.firstName} ${customer.lastName}`,
       projectName: project.name,
       projectLink,
@@ -388,7 +388,7 @@ export class EmailService {
     const projectLink = this.makeRedirectLink(consultant, `admin/projects/${project.id}`);
     const reasons = estimate.declineReasons.map(reason => declineReasonTexts[reason]).join('<br>');
     return this.sendMail(EmailType.EstimateDeclined, consultant.email, {
-      name: `${consultant.firstName} ${consultant.lastName}`,
+      name: consultant.firstName,
       customerName: `${customer.firstName} ${customer.lastName}`,
       projectName: project.name,
       projectLink,
@@ -402,7 +402,7 @@ export class EmailService {
     const projectLink = this.makeRedirectLink(consultant, `admin/projects/${project.id}`);
     const reasons = proposal.declineReasons.map(reason => declineReasonTexts[reason]).join('<br>');
     return this.sendMail(EmailType.FinalProposalDeclined, consultant.email, {
-      name: `${consultant.firstName} ${consultant.lastName}`,
+      name: consultant.firstName,
       customerName: `${customer.firstName} ${customer.lastName}`,
       projectName: project.name,
       projectLink,
@@ -414,7 +414,7 @@ export class EmailService {
     const customer = project.customer.user;
     const projectLink = this.makeRedirectLink(user, `admin/projects/${project.id}/management`);
     return this.sendMail(EmailType.PickPaversScheduleChangeRequest, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       customerName: `${customer.firstName} ${customer.lastName}`,
       projectName: project.name,
       projectLink,
@@ -426,7 +426,7 @@ export class EmailService {
     const rescheduleLink = this.makeRedirectLink(user, `admin/projects/${schedule.estimate.project.id}/estimate`);
     const siteVisitDate = convertUtcToEstString(new Date(date));
     return this.sendMail(EmailType.SiteVisitReminderForCustomer, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       rescheduleLink,
       siteVisitDate,
     });
@@ -435,7 +435,7 @@ export class EmailService {
   async sendNewProjectEmail(user: User, project: Project): Promise<boolean> {
     const projectLink = this.makeRedirectLink(user, `admin/projects/${project.id}`);
     return this.sendMail(EmailType.NewProjectRegistered, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       projectLink,
     }, project);
   }
@@ -444,7 +444,7 @@ export class EmailService {
     const { id: projectId, user: customer, name: projectName } = project;
     const contractLink = this.makeRedirectLink(user, `admin/projects/${projectId}/contract`);
     return this.sendMail(EmailType.ContractSigned, user.email, {
-      name: `${user.firstName} ${user.lastName}`,
+      name: user.firstName,
       customerName: `${customer.firstName} ${customer.lastName}`,
       projectName,
       contractLink,
