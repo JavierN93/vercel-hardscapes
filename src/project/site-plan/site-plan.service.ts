@@ -66,7 +66,7 @@ export class SitePlanService {
     const sitePlan = new SitePlan();
     sitePlan.brief = finalProposal.project.comment;
     sitePlan.existingSiteAssessment = finalProposal.existingSiteAssessment;
-    sitePlan.costItems = finalProposal.costEstimates.map(costEstimate => {
+    sitePlan.costItems = finalProposal.costEstimates.filter(costItem => costItem.accept).map(costEstimate => {
       const costItem = new CostItem();
       costItem.comment = costEstimate.comment;
       costItem.cost = costEstimate.cost;
@@ -74,9 +74,9 @@ export class SitePlanService {
 
       return costItem;
     });
-    sitePlan.accessoryMaterialDetails = finalProposal.layouts.map(layout => {
+    sitePlan.accessoryMaterialDetails = finalProposal.costEstimates.filter(costItem => costItem.accept).map(costEstimate => {
       const accessoryMaterialDetail = new AccessoryMaterialDetail();
-      accessoryMaterialDetail.type = layout.type;
+      accessoryMaterialDetail.type = costEstimate.type;
       accessoryMaterialDetail.materials = [];
       accessoryMaterialDetail.comment = '';
       accessoryMaterialDetail.attachments = [];
