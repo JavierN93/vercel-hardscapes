@@ -95,9 +95,10 @@ export class EmailService {
   }
 
   async sendInvitationEmail(user: User, tempPassword: string): Promise<boolean> {
+    const name = user.role === UserRole.Contractor ? 'Contractor Candidate' : user.firstName;
     return this.sendMail(user.role === UserRole.Contractor ? EmailType.ContractorInvitation : EmailType.Invitation, user.email, {
       tempPassword,
-      name: `${user.firstName} ${user.lastName}`,
+      name,
       passwordResetLink: `${process.env.PRODUCTION_HOST}/invite/${user.id}`,
       linkExpireHours: resetPasswordLinkExpireHours,
     });
