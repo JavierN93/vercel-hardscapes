@@ -270,9 +270,11 @@ export class EmailService {
   }
 
   async sendFinalProposalAcceptedEmail(project: Project): Promise<boolean> {
-    const { user, id: projectId } = project;
+    const { user, id: projectId, consultant } = project;
+    const consultantName = consultant.user.fullName;
     const projectLink = this.makeRedirectLink(user, `app/project/${projectId}/management`);
     return this.sendMail(EmailType.FinalProposalAccepted, user.email, {
+      consultantName,
       name: user.firstName,
       projectLink,
     }, project);
