@@ -199,7 +199,7 @@ export class CustomerController {
       body.patioPackage = await this.usersService.savePatioPackage(body.patioPackage);
       await this.saveLead(body, body.patioPackage as PatioPackage);
     }
-    if (!isInvite) {
+    if (!isInvite && body.projects.length) {
       await this.emailService.sendConsultationEmail(user);
     }
     const projects = await Promise.all(body.projects.map(projectDto => {
