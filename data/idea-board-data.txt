@@ -52,7 +52,7 @@
 52	patio	pavers	3264	1836
 53	patio	pavers	3264	1836
 54	patio	pavers	3264	1836
-55	retaining wall	srw	1080	1080
+55	patio	srw	1080	1080
 56	patio	pavers	1080	1080
 57	driveway	pavers	4032	3024
 58	patio	pavers	4032	3024
