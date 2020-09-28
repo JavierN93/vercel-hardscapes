@@ -10,7 +10,7 @@ import { titleCase } from 'typeorm/util/StringUtils';
 import { replaceTagsOnMailString } from '../common/utils/email.util';
 import { PendingMessage } from '../chat/interfaces';
 import { EmailType } from '../common/enums/email.type';
-import { emailTemplate, EmailTemplateSubjects } from '../common/email/email.template';
+import { emailTemplate, EmailTemplateSubjects, emailText } from '../common/email/email.template';
 import { resetPasswordLinkExpireHours } from '../common/constants/general.constants';
 import { User } from '../users/entities/user.entity';
 import { Project } from '../project/entities/project.entity';
@@ -547,10 +547,12 @@ export class EmailService {
   async sendMail(code: EmailType, recipient: string, substitutes: any, project?: Project, from?: string): Promise<boolean> {
     const subject = replaceTagsOnMailString(EmailTemplateSubjects[code], substitutes);
     const html = replaceTagsOnMailString(emailTemplate(code), substitutes);
+    const text = replaceTagsOnMailString(emailText(code), substitutes);
     const clientResponse = await this.sendGrid.send({
       from: from || `${globalConfig.companyName} <support@${process.env.MAIL_DOMAIN}>`,
       to: recipient,
       subject,
+      text,
       html,
     });
     if (clientResponse && clientResponse.length) {
