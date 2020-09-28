@@ -48,5 +48,5 @@ export function getDummyIdeas(): Idea[] {
     idea.width = +segs[3];
     idea.height = +segs[4];
     return idea;
-  });
+  }).filter(idea => idea);
 }
