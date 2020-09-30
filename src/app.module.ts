@@ -5,7 +5,6 @@ import { UsersModule } from './users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SeedModule } from './seed/seed.module';
-import { ContactUsModule } from './contact-us/contact-us.module';
 import { SlackModule } from './slack/slack.module';
 import { EmailModule } from './email/email.module';
 import { JobsModule } from './jobs/jobs.module';
@@ -48,7 +47,6 @@ import * as ormconfig from './ormconfig';
     ProjectModule,
     IdeaBoardModule,
     CustomerModule,
-    ContactUsModule,
     SocketModule,
     EventModule,
     NotificationModule,

@@ -3,7 +3,7 @@ import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 import { SourceFoundUs } from '../../common/enums/source-found-us.enum';
 
-export class SendContactUsMessageDto {
+export class ExternalContactRequestDto {
   @ApiProperty()
   @IsEmail()
   email: string;

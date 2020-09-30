@@ -1,6 +1,11 @@
 import { SlackMessageType } from '../../slack/enums/slack-message-type.enum';
 import { Lead } from '../../lead/entities/lead.entity';
-import { colorContactMessage, colorJobApplyMessage, colorNewUserMessage } from '../constants/colors.constants';
+import {
+  colorContactMessage,
+  colorJobApplyMessage,
+  colorNewUserMessage,
+  colorPartnerRequestMessage,
+} from '../constants/colors.constants';
 import { Applicant } from '../../jobs/entities/applicant.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -10,6 +15,49 @@ function buildContactUsMessage(data: Lead) {
     attachments: [
       {
         color: colorContactMessage,
+        fields: [
+          {
+            title: 'Name',
+            value: data.fullName,
+            short: true,
+          },
+          {
+            title: 'Email',
+            value: data.email,
+            short: true
+          },
+          {
+            title: 'Phone',
+            value: data.phone,
+            short: false
+          },
+          {
+            title: 'Message',
+            value: data.message,
+            short: false
+          },
+          {
+            title: 'Address',
+            value: data.address,
+            short: false
+          },
+          {
+            title: 'Source found us',
+            value: data.sourceFoundUs,
+            short: false
+          },
+        ]
+      }
+    ]
+  }
+}
+
+function buildPartnerRequestMessage(data: Lead) {
+  return {
+    text: '<!here> Someone sent a partner request message.',
+    attachments: [
+      {
+        color: colorPartnerRequestMessage,
         fields: [
           {
             title: 'Name',
@@ -120,5 +168,7 @@ export function buildSlackMessage(type: SlackMessageType, body) {
     return buildJobApplyMessage(body);
   } else if (type === SlackMessageType.NewUserRegistered) {
     return buildNewUserMessage(body);
+  } else if (type === SlackMessageType.PartnerRequest) {
+    return buildPartnerRequestMessage(body);
   }
 }

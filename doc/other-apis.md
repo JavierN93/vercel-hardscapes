@@ -29,3 +29,24 @@
   "success": "boolean"
 }
 ```
+
+##### POST /api/partner-request
+* Send partner request message
+```
+{
+  "email": "email",
+  "phone": "string",
+  "fullName": "string",
+  "message": "string",
+  "address": "string",
+  "latitude"?: "number",
+  "longitdude"?: "number",
+  "sourceFoundUs": "SourceFoundUs",
+}
+```
+* Returns success state
+```
+{
+  "success": "boolean"
+}
+```

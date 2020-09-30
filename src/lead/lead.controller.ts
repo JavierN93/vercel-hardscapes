@@ -13,19 +13,25 @@ import { LeadDto } from './dtos/lead.dto';
 import { QueryLeadsDto } from './dtos/query-leads.dto';
 import { LeadService } from './lead.service';
 import { SuccessResponse } from '../common/models/success-response';
-import { LeadStatus } from './enums';
+import { LeadStatus, LeadType } from './enums';
+import { ExternalContactRequestDto } from './dtos/external-contact-request.dto';
+import { getFromDto } from '../common/utils/repository.util';
+import { Lead } from './entities/lead.entity';
+import { SlackMessageType } from '../slack/enums/slack-message-type.enum';
+import { SlackService } from '../slack/slack.service';
 
 @ApiTags('Lead')
 @ApiBearerAuth()
-@Controller('api/lead')
+@Controller('api')
 export class LeadController {
 
   constructor(
     private readonly leadService: LeadService,
+    private readonly slackService: SlackService,
   ) {
   }
 
-  @Get('all')
+  @Get('lead/all')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: LeadDto, isArray: true })
@@ -37,7 +43,7 @@ export class LeadController {
     return { data: result.map(r => r.toDto()), count };
   }
 
-  @Get(':id')
+  @Get('lead/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles([UserRole.Consultant])
   @ApiOkResponse({ type: LeadDto })
@@ -46,19 +52,44 @@ export class LeadController {
     return lead.toDto();
   }
 
-  @Put(':id')
+  @Put('lead/:id')
   @ApiOkResponse({ type: () => LeadDto })
   async updateLead(@Param('id') id: string, @Body() payload: LeadDto): Promise<LeadDto> {
     const updated = await this.leadService.updateLeadById(id, payload);
     return updated.toDto();
   }
 
-  @Post(':id/archive')
+  @Post('lead/:id/archive')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOkResponse({ type: () => SuccessResponse })
   @ApiImplicitParam({ name: 'id', required: false })
   async archive(@Param('id') id: string): Promise<SuccessResponse> {
     await this.leadService.updateLeadStatusById(id, LeadStatus.Archived);
+    return new SuccessResponse(true);
+  }
+
+  @Post('contact')
+  @ApiOkResponse({ type: SuccessResponse })
+  async contact(@Body() body: ExternalContactRequestDto): Promise<SuccessResponse> {
+    const lead = getFromDto<Lead>(body, new Lead())
+    lead.type = LeadType.ContactUs;
+    const data = await this.leadService.add(lead);
+    try {
+      await this.slackService.sendNotification(SlackMessageType.SendContactUsMessage, data);
+    } catch (e) {
+      console.log('contact us message error: ' + e);
+    }
+    return new SuccessResponse(true);
+  }
+
+  @Post('partner-request')
+  @ApiOkResponse({ type: SuccessResponse })
+  async partnerRequest(@Body() body: ExternalContactRequestDto): Promise<SuccessResponse> {
+    try {
+      await this.slackService.sendNotification(SlackMessageType.PartnerRequest, body);
+    } catch (e) {
+      console.log('contact us message error: ' + e);
+    }
     return new SuccessResponse(true);
   }
 }
