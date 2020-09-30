@@ -88,7 +88,7 @@ export class LeadController {
     try {
       await this.slackService.sendNotification(SlackMessageType.PartnerRequest, body);
     } catch (e) {
-      console.log('contact us message error: ' + e);
+      console.log('partner request message error: ' + e);
     }
     return new SuccessResponse(true);
   }
