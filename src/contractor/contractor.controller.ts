@@ -16,24 +16,27 @@ import { ContractorService } from './contractor.service';
 import { UsersService } from '../users/users.service';
 import { PortfolioService } from '../portfolio/portfolio.service';
 import { UpdateContractorProfileDto } from './dtos/update-contractor-profile.dto';
+import { EmailService } from '../email/email.service';
+import { NotificationService } from '../notification/notification.service';
+import { SlackService } from '../slack/slack.service';
 import { User } from '../users/entities/user.entity';
-import { UserRole } from '../common/enums/user-role.enum';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { ContractorStatus } from '../users/enums';
 import { SuccessResponse } from '../common/models/success-response';
 import { ApproveReputationDto } from './dtos/approve-reputation.dto';
-import { EmailService } from '../email/email.service';
 import { SignLegalTermDto } from './dtos/sign-legal-term.dto';
 import { LegalTermType } from './enums';
 import { QueryContractorDto } from './dtos/query-contractor.dto';
 import { ContractorUserDto } from './dtos/contractor-user.dto';
-import { projectDefaultTakeCount } from '../common/constants/general.constants';
 import { PaginationDto } from '../common/dtos/pagination.dto';
 import { PaginatorDto } from '../common/dtos/paginator.dto';
-import { NotificationService } from '../notification/notification.service';
 import { SetupPaymentDto } from './dtos/setup-payment.dto';
+import { ExternalContactRequestDto } from '../lead/dtos/external-contact-request.dto';
+import { ContractorStatus } from '../users/enums';
+import { projectDefaultTakeCount } from '../common/constants/general.constants';
+import { UserRole } from '../common/enums/user-role.enum';
+import { SlackMessageType } from '../slack/enums/slack-message-type.enum';
 
 @ApiTags('Contractor')
 @Controller('api')
@@ -44,6 +47,7 @@ export class ContractorController {
     private portfolioService: PortfolioService,
     private emailService: EmailService,
     private notificationService: NotificationService,
+    private slackService: SlackService,
   ) {
   }
 
@@ -248,6 +252,17 @@ export class ContractorController {
     user.contractorProfile.status = ContractorStatus.Rejected;
     await this.contractorService.updateContractorProfile(user.contractorProfile);
     await this.notificationService.adminDeclinedOnboardingContractorEvent(user);
+    return new SuccessResponse(true);
+  }
+
+  @Post('partner-request')
+  @ApiOkResponse({ type: SuccessResponse })
+  async partnerRequest(@Body() body: ExternalContactRequestDto): Promise<SuccessResponse> {
+    try {
+      await this.slackService.sendNotification(SlackMessageType.PartnerRequest, body);
+    } catch (e) {
+      console.log('partner request message error: ' + e);
+    }
     return new SuccessResponse(true);
   }
 }

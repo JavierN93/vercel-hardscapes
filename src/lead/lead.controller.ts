@@ -81,15 +81,4 @@ export class LeadController {
     }
     return new SuccessResponse(true);
   }
-
-  @Post('partner-request')
-  @ApiOkResponse({ type: SuccessResponse })
-  async partnerRequest(@Body() body: ExternalContactRequestDto): Promise<SuccessResponse> {
-    try {
-      await this.slackService.sendNotification(SlackMessageType.PartnerRequest, body);
-    } catch (e) {
-      console.log('partner request message error: ' + e);
-    }
-    return new SuccessResponse(true);
-  }
 }
