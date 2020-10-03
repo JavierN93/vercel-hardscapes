@@ -165,9 +165,11 @@ export class EmailService {
     }, null, `${globalConfig.companyName} <${fromEmail}>`);
   }
 
-  async sendConsultationEmail(user: User): Promise<boolean> {
+  async sendConsultationEmail(user: User, project: Project): Promise<boolean> {
+    const projectLink = this.makeRedirectLink(user, `app/project/${project.id}`);
     return this.sendMail(EmailType.ProjectCreated, user.email, {
       name: user.firstName,
+      projectLink
     });
   }
 

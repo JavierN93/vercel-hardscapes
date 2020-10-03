@@ -199,14 +199,14 @@ export class CustomerController {
       body.patioPackage = await this.usersService.savePatioPackage(body.patioPackage);
       await this.saveLead(body, body.patioPackage as PatioPackage);
     }
-    if (!isInvite && body.projects.length) {
-      await this.emailService.sendConsultationEmail(user);
-    }
     const projects = await Promise.all(body.projects.map(projectDto => {
       const project = this.projectService.addProject(user.customerProfile, projectDto);
       this.leadService.updateLeadStatusByEmail(user.email, LeadStatus.Processed);
       return project;
     }));
+    if (!isInvite && body.projects.length) {
+      await this.emailService.sendConsultationEmail(user, projects[0]);
+    }
     if (!user.address && projects.length !== 0) {
       user.address = projects[0].address;
       user.latitude = projects[0].latitude;
