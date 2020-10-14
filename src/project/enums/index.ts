@@ -16,6 +16,7 @@ export enum ProjectAccessoryType {
   CleaningSanding = 'CLEANING_SANDING',
   MinorRepair = 'MINOR_REPAIR',
   LandscapingPlants = 'LANDSCAPING_PLANTS',
+  StoneCurbing = 'STONE_CURBING',
   Other = 'OTHER',
 }
 
