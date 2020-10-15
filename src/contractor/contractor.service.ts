@@ -7,6 +7,7 @@ import { Portfolio } from '../portfolio/entities/portfolio.entity';
 import { User } from '../users/entities/user.entity';
 import { UpdateContractorProfileDto } from './dtos/update-contractor-profile.dto';
 import { getFromDto } from '../common/utils/repository.util';
+import { ContractorStatus } from '../users/enums';
 
 @Injectable()
 export class ContractorService {
@@ -18,6 +19,7 @@ export class ContractorService {
   saveContractorProfile(user: User, portfolios: Portfolio[], payload: UpdateContractorProfileDto): Promise<ContractorProfile> {
     const contractorProfile = getFromDto<ContractorProfile>(payload, user.contractorProfile || new ContractorProfile());
     contractorProfile.portfolios = portfolios;
+    contractorProfile.status = ContractorStatus.UserCreated;
     return this.contractorRepository.save(contractorProfile);
   }
 
