@@ -74,7 +74,7 @@ export class EstimateService {
     return this.scheduleRepository.find({
       relations: ['estimate', 'estimate.project', 'estimate.project.customer', 'estimate.project.customer.user', 'estimate.project.consultant', 'estimate.project.consultant.user'],
       where: {
-        selected: true,
+        type: ScheduleType.SiteVisitSchedule,
         reminderSent: false,
         from: Between(new Date(), tomorrow),
       },
