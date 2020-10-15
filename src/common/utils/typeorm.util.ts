@@ -17,6 +17,9 @@ export class NumericRangeTransformer {
   }
 
   from(data: string): number[] {
+    if (!data) {
+      return [0, 0];
+    }
     return JSON.parse(`${data.substr(0, data.length - 1)}]`);
   }
 }
