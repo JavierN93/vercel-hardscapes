@@ -38,6 +38,7 @@ export enum HardscapingPropertyType {
 }
 
 export enum ContractorStatus {
+  InvitationSent = "INVITATION_SENT",
   UserCreated = 'CREATED',
   BasicProfileApproved = 'BASIC_PROFILE_APPROVED',
   QualityCheckPassed = 'QUALITY_CHECK_PASSED',
