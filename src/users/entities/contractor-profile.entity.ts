@@ -84,7 +84,7 @@ export class ContractorProfile extends SoftDelete {
   otherSocialLink: string;
 
   @ApiProperty({ enum: ContractorStatus })
-  @Column({ type: 'enum', enum: ContractorStatus, default: ContractorStatus.UserCreated })
+  @Column({ type: 'enum', enum: ContractorStatus, default: ContractorStatus.InvitationSent })
   status: ContractorStatus;
 
   @ApiProperty({ enum: ContractorClass })
