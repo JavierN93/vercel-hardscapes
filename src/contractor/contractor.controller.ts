@@ -120,7 +120,7 @@ export class ContractorController {
         user.contractorProfile.workingAgreementSignedDate = new Date();
         break;
     }
-    if (user.contractorProfile.subContractorAgreementSignedDate && user.contractorProfile.ndaSignedDate && user.contractorProfile.workingAgreementSignedDate) {
+    if (user.contractorProfile.subContractorAgreementSignedDate) {
       user.contractorProfile.status = ContractorStatus.SignedLegalTerms;
       const admins = await this.userService.findSuperAdmins();
       await this.notificationService.contractorSignedLegalTermsEvent(admins, user);
