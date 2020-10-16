@@ -109,18 +109,10 @@ export class ContractorController {
     if (user.contractorProfile.status !== ContractorStatus.ReputationCheckPassed) {
       throw new BadRequestException('Preview step was not verified by the admin yet.');
     }
-    switch (payload.type) {
-      case LegalTermType.SubContractorAgreement:
-        user.contractorProfile.subContractorAgreementSignedDate = new Date();
-        break;
-      case LegalTermType.NDA:
-        user.contractorProfile.ndaSignedDate = new Date();
-        break;
-      case LegalTermType.WorkingAgreement:
-        user.contractorProfile.workingAgreementSignedDate = new Date();
-        break;
+    if (payload.type === LegalTermType.SubContractorAgreement) {
+      user.contractorProfile.subContractorAgreementSignedDate = new Date();
     }
-    if (user.contractorProfile.subContractorAgreementSignedDate && user.contractorProfile.ndaSignedDate && user.contractorProfile.workingAgreementSignedDate) {
+    if (user.contractorProfile.subContractorAgreementSignedDate) {
       user.contractorProfile.status = ContractorStatus.SignedLegalTerms;
       const admins = await this.userService.findSuperAdmins();
       await this.notificationService.contractorSignedLegalTermsEvent(admins, user);
