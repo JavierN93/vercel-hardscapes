@@ -109,8 +109,16 @@ export class ContractorController {
     if (user.contractorProfile.status !== ContractorStatus.ReputationCheckPassed) {
       throw new BadRequestException('Preview step was not verified by the admin yet.');
     }
-    if (payload.type === LegalTermType.SubContractorAgreement) {
-      user.contractorProfile.subContractorAgreementSignedDate = new Date();
+    switch (payload.type) {
+      case LegalTermType.SubContractorAgreement:
+        user.contractorProfile.subContractorAgreementSignedDate = new Date();
+        break;
+      case LegalTermType.NDA:
+        user.contractorProfile.ndaSignedDate = new Date();
+        break;
+      case LegalTermType.WorkingAgreement:
+        user.contractorProfile.workingAgreementSignedDate = new Date();
+        break;
     }
     if (user.contractorProfile.subContractorAgreementSignedDate) {
       user.contractorProfile.status = ContractorStatus.SignedLegalTerms;

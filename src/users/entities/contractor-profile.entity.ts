@@ -97,6 +97,14 @@ export class ContractorProfile extends SoftDelete {
 
   @ApiProperty()
   @Column({ nullable: true, default: undefined })
+  ndaSignedDate: Date;
+
+  @ApiProperty()
+  @Column({ nullable: true, default: undefined })
+  workingAgreementSignedDate: Date;
+
+  @ApiProperty()
+  @Column({ nullable: true, default: undefined })
   stripeAccountId: string;
 
   @ApiProperty()

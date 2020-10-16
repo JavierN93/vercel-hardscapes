@@ -26,6 +26,8 @@ export enum SubContractStatus {
 
 export enum LegalTermType {
   SubContractorAgreement = 'SUB_CONTRACTOR_AGREEMENT',
+  NDA = 'NDA',
+  WorkingAgreement = 'WORKING_AGREEMENT',
 }
 
 export enum SubContractDeclineReason {
