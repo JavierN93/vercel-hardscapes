@@ -23,13 +23,14 @@ sudo apt install postgresql postgresql-contrib
 sudo apt install awscli
 ```
 #### 3. Configure postgresql
-* create a user
+* create root a user and set password
 ```bash
-sudo -i -u postgres
-createuser --interactive
+$ sudo -i -u postgres
+$ psql postgres postgres
+postgres=# create user root;
+postgres=# alter user root with password 'root';
+postgres=# exit
 ```
-The script will prompt you with some choices and, based on your responses, execute the correct Postgres commands to create a user to your specifications.<br>
-create user with username `root`.
 * change postgresql connect option
 Use vim or other text edit tool to edit `/etc/postgress/12/main/pg_hba.conf`.<br>
 Find this part in the file and modify `peer` to `md5`.
