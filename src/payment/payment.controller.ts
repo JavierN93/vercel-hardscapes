@@ -72,7 +72,7 @@ export class PaymentController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Consultant])
+  @Roles([])
   @Post(':milestoneId/mark-as-paid')
   @ApiOkResponse({ type: Milestone })
   async setMilestoneAsPaid(@Request() request, @Param('milestoneId') milestoneId: string): Promise<Milestone> {
