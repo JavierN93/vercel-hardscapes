@@ -8,7 +8,8 @@ import {
   Param,
   Post,
   Req,
-  Request, UnauthorizedException,
+  Request,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -66,6 +67,33 @@ export class PaymentController {
     const project = await this.projectService.findProjectById(milestone.project.id);
     const notificationRecipients = admins.find(admin => admin.id === project.consultant.user.id) ? admins : [...admins, project.consultant.user];
     await this.notificationService.customerRequestedCashPaymentEvent(notificationRecipients, milestone);
+    return milestone;
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([])
+  @Post(':milestoneId/mark-as-paid')
+  @ApiOkResponse({ type: Milestone })
+  async setMilestoneAsPaid(@Request() request, @Param('milestoneId') milestoneId: string): Promise<Milestone> {
+    const milestone = await this.projectService.findMilestoneById(milestoneId);
+    const project = await this.projectService.findProjectById(milestone.project.id);
+    if (milestone.order === MilestoneType.Start) {
+      const depositMilestone = project.milestones.find(m => m.order === MilestoneType.Deposit);
+      if (depositMilestone.status !== MilestoneStatus.Released) {
+        throw new BadRequestException('Deposit milestone should be paid first.');
+      }
+    } else if (milestone.order === MilestoneType.Final) {
+      const startMilestone = project.milestones.find(m => m.order === MilestoneType.Start);
+      if (startMilestone.status !== MilestoneStatus.Released) {
+        throw new BadRequestException('Start milestone should be paid first.');
+      }
+    }
+    milestone.status = MilestoneStatus.Released;
+    milestone.paidDate = new Date();
+    milestone.payWithCash = true;
+    milestone.paymentMethod = PaymentMethod.Cash;
+    await this.projectService.updateMilestone(milestone);
     return milestone;
   }
 
