@@ -8,7 +8,8 @@ import {
   Param,
   Post,
   Req,
-  Request, UnauthorizedException,
+  Request,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -66,6 +67,21 @@ export class PaymentController {
     const project = await this.projectService.findProjectById(milestone.project.id);
     const notificationRecipients = admins.find(admin => admin.id === project.consultant.user.id) ? admins : [...admins, project.consultant.user];
     await this.notificationService.customerRequestedCashPaymentEvent(notificationRecipients, milestone);
+    return milestone;
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.Consultant])
+  @Post(':milestoneId/set-as-paid')
+  @ApiOkResponse({ type: Milestone })
+  async setMilestoneAsPaid(@Request() request, @Param('milestoneId') milestoneId: string): Promise<Milestone> {
+    const milestone = await this.projectService.findMilestoneById(milestoneId);
+    milestone.status = MilestoneStatus.Released;
+    milestone.paidDate = new Date();
+    milestone.payWithCash = true;
+    milestone.paymentMethod = PaymentMethod.Cash;
+    await this.projectService.updateMilestone(milestone);
     return milestone;
   }
 
