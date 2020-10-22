@@ -73,10 +73,22 @@ export class PaymentController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles([UserRole.Consultant])
-  @Post(':milestoneId/set-as-paid')
+  @Post(':milestoneId/mark-as-paid')
   @ApiOkResponse({ type: Milestone })
   async setMilestoneAsPaid(@Request() request, @Param('milestoneId') milestoneId: string): Promise<Milestone> {
     const milestone = await this.projectService.findMilestoneById(milestoneId);
+    const project = await this.projectService.findProjectById(milestone.project.id);
+    if (milestone.order === MilestoneType.Start) {
+      const depositMilestone = project.milestones.find(m => m.order === MilestoneType.Deposit);
+      if (depositMilestone.status !== MilestoneStatus.Released) {
+        throw new BadRequestException('Deposit milestone should be paid first.');
+      }
+    } else if (milestone.order === MilestoneType.Final) {
+      const startMilestone = project.milestones.find(m => m.order === MilestoneType.Start);
+      if (startMilestone.status !== MilestoneStatus.Released) {
+        throw new BadRequestException('Start milestone should be paid first.');
+      }
+    }
     milestone.status = MilestoneStatus.Released;
     milestone.paidDate = new Date();
     milestone.payWithCash = true;
