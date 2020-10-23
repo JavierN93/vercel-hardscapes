@@ -15,7 +15,7 @@ export const defaultProcedureSteps = [
   },
   {
     title: 'Screeding',
-    comment: `pon completion of packing the process gravel base, ${globalConfig.companyName} will use a ¼” chip stone (Not sand or stone dust) to set the final level and grade in preparation to lay the pavers. Chip stone will be compacted prior to screeding and will act as the final step in base preparation.`,
+    comment: `Upon completion of packing the process gravel base, ${globalConfig.companyName} will use a ¼” chip stone (Not sand or stone dust) to set the final level and grade in preparation to lay the pavers. Chip stone will be compacted prior to screeding and will act as the final step in base preparation.`,
   },
   {
     title: 'Installation',
@@ -23,7 +23,7 @@ export const defaultProcedureSteps = [
   },
   {
     title: 'Polymeric sand',
-    comment: `pon completion of laying the pavers, polymeric sand will be spread across the pavers. ${globalConfig.companyName} will then compact the pavers with a smaller plate compactor, forcing the poly sand down in-between all the cracks. Once packed, the pavers will be swept clean, blown off and water will be sprayed on top and thoroughly to activate the poly sand. (Note - poly sand can not be applied if pavers are wet or temperatures are below 32 degrees)`,
+    comment: `Upon completion of laying the pavers, polymeric sand will be spread across the pavers. ${globalConfig.companyName} will then compact the pavers with a smaller plate compactor, forcing the poly sand down in-between all the cracks. Once packed, the pavers will be swept clean, blown off and water will be sprayed on top and thoroughly to activate the poly sand. (Note - poly sand can not be applied if pavers are wet or temperatures are below 32 degrees)`,
   },
   {
     title: 'Clean up',
