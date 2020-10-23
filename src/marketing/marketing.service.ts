@@ -10,13 +10,16 @@ import { formatTimeByUnit } from '../common/utils/time.util';
 import { ReportFilterDto } from '../common/dtos/report-filter.dto';
 import { SessionCountDto } from './dtos/session-count.dto';
 import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from '../common/enums/time.enum';
+import { LeadService } from '../lead/lead.service';
+import { SourceFoundUsCountDto } from './dtos/source-found-us-count.dto';
 
 @Injectable()
 export class MarketingService {
-  
+
   constructor(
     @InjectRepository(PageVisitHistory)
-    private pageVisitHistoryRepository: Repository<PageVisitHistory>
+    private pageVisitHistoryRepository: Repository<PageVisitHistory>,
+    private leadService: LeadService,
   ) {
   }
 
@@ -51,5 +54,9 @@ export class MarketingService {
       .groupBy('"date"')
       .getRawMany();
   }
-  
+
+  getSourceFoundUsCounts(): Promise<SourceFoundUsCountDto[]> {
+    return this.leadService.countBySourceFoundUs();
+  }
+
 }

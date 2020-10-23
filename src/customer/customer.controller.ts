@@ -194,10 +194,11 @@ export class CustomerController {
     }
     if (!body.patioPackage) {
       delete body.patioPackage;
+      await this.saveLead(body, null, LeadType.LandingPage);
     } else {
       body.patioPackage.user = user;
       body.patioPackage = await this.usersService.savePatioPackage(body.patioPackage);
-      await this.saveLead(body, body.patioPackage as PatioPackage);
+      await this.saveLead(body, body.patioPackage as PatioPackage, LeadType.PatioPackage);
     }
     const projects = await Promise.all(body.projects.map(projectDto => {
       const project = this.projectService.addProject(user.customerProfile, projectDto);
@@ -223,10 +224,10 @@ export class CustomerController {
     return this.authService.login(user);
   }
 
-  private async saveLead(payload: RegisterCustomerDto, patioPackage: PatioPackage) {
+  private async saveLead(payload: RegisterCustomerDto, patioPackage: PatioPackage, leadType: LeadType) {
     const lead = new Lead();
     const user = payload.user;
-    lead.type = LeadType.PatioPackage;
+    lead.type = leadType;
     lead.fullName = user.firstName + ' ' + user.lastName;
     lead.email = user.email;
     lead.phone = user.phone;

@@ -14,6 +14,7 @@ import { TimeUnit } from '../common/enums/time.enum';
 import { SessionCountDto } from './dtos/session-count.dto';
 import { ProjectService } from '../project/project.service';
 import { ProjectBriefLocationDto } from './dtos/project-brief-location.dto';
+import { SourceFoundUsCountDto } from './dtos/source-found-us-count.dto';
 
 @ApiTags('Marketing')
 @Controller('api/marketing')
@@ -48,6 +49,15 @@ export class MarketingController {
   getOverallTrafficHistory(@Query() query: ReportFilterDto): Promise<SessionCountDto[]> {
     query.unit = query.unit || TimeUnit.Hour;
     return this.marketingService.getOverallTrafficHistory(query);
+  }
+
+  @Get('lead-source-stats')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.Consultant])
+  @ApiOkResponse({ type: SourceFoundUsCountDto, isArray: true })
+  getLeadSourceStats(): Promise<SourceFoundUsCountDto[]> {
+    return this.marketingService.getSourceFoundUsCounts();
   }
 
   @Get('projects')
