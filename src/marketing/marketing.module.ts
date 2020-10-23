@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ProjectModule } from '../project/project.module';
+import { LeadModule } from '../lead/lead.module';
 import { PageVisitHistory } from './entities/page-visit-history.entity';
 import { MarketingController } from './marketing.controller';
 import { MarketingService } from './marketing.service';
@@ -10,6 +11,7 @@ import { MarketingService } from './marketing.service';
   imports: [
     TypeOrmModule.forFeature([PageVisitHistory]),
     ProjectModule,
+    LeadModule,
   ],
   controllers: [MarketingController],
   providers: [MarketingService]

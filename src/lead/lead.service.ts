@@ -6,6 +6,7 @@ import { SortByDateType } from '../common/enums/query.enum';
 import { Lead } from './entities/lead.entity';
 import { LeadDto } from './dtos/lead.dto';
 import { LeadStatus } from './enums';
+import { SourceFoundUsCountDto } from '../marketing/dtos/source-found-us-count.dto';
 
 @Injectable()
 export class LeadService {
@@ -42,6 +43,15 @@ export class LeadService {
     }
     await this.repository.update({ id }, payload);
     return this.findLeadById(id);
+  }
+
+  countBySourceFoundUs(): Promise<SourceFoundUsCountDto[]> {
+    return this.repository.createQueryBuilder('lead')
+      .where('"sourceFoundUs" is not null')
+      .select('count(*) as count')
+      .addSelect('"sourceFoundUs"')
+      .groupBy('"sourceFoundUs"')
+      .getRawMany();
   }
 
   updateLeadStatusByEmail(email: string, status: LeadStatus) {
