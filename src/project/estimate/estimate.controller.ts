@@ -103,7 +103,7 @@ export class EstimateController {
   @Roles([UserRole.Customer])
   @Post(':projectId/activate-estimate')
   @ApiParam({ name: 'projectId', required: true })
-  @ApiOkResponse({ type: EstimateDto })
+  @ApiOkResponse({ type: SuccessResponse })
   async activateEstimate(@Param('projectId') projectId: string): Promise<SuccessResponse> {
     const estimate = await this.estimateService.findEstimateFromProjectId(projectId);
     if (!estimate) { return new SuccessResponse(false); }

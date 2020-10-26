@@ -74,7 +74,7 @@ export class FinalProposalController {
   @Roles([UserRole.Customer])
   @Post(':id/activate-proposal')
   @ApiParam({ name: 'projectId', required: true })
-  @ApiOkResponse({ type: [Milestone] })
+  @ApiOkResponse({ type: SuccessResponse })
   async activateProposal(@Request() request, @Param('id') id: string): Promise<SuccessResponse> {
     const proposal = await this.finalProposalService.findProposalFromProjectId(id);
     if (!proposal) { return new SuccessResponse(false); }
