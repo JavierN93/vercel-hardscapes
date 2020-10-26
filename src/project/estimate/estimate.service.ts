@@ -11,6 +11,7 @@ import { EstimateDto } from './dto/estimate.dto';
 import { getFromDto } from '../../common/utils/repository.util';
 import { SuccessResponse } from '../../common/models/success-response';
 import { ScheduleType } from '../../schedule/enums';
+import { EstimateStatus } from '../enums';
 
 @Injectable()
 export class EstimateService {
@@ -25,6 +26,14 @@ export class EstimateService {
 
   count(): Promise<number> {
     return this.estimateRepository.count();
+  }
+
+  async activateEstimate(estimate: Estimate): Promise<boolean> {
+    if (estimate.status !== EstimateStatus.Declined) {
+      return false;
+    }
+    await this.estimateRepository.update({ id: estimate.id }, { status: EstimateStatus.Pending });
+    return true;
   }
 
   findEstimateFromProjectId(projectId: string): Promise<Estimate> {

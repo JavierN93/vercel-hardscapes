@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { EstimateService } from '../estimate/estimate.service';
 import { FinalProposalService } from './final-proposal.service';
@@ -67,6 +67,19 @@ export class FinalProposalController {
     await this.projectService.makeMilestonesFromProposal(proposal);
     await this.updateStatus(id, request.user.id, FinalProposalStatus.Accepted);
     return this.projectService.findMilestonesByProjectId(id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(RolesGuard)
+  @Roles([UserRole.Customer])
+  @Post(':id/activate-proposal')
+  @ApiParam({ name: 'projectId', required: true })
+  @ApiOkResponse({ type: [Milestone] })
+  async activateProposal(@Request() request, @Param('id') id: string): Promise<SuccessResponse> {
+    const proposal = await this.finalProposalService.findProposalFromProjectId(id);
+    if (!proposal) { return new SuccessResponse(false); }
+    const result = await this.finalProposalService.activateProposal(proposal);
+    return new SuccessResponse(result);
   }
 
   @ApiBearerAuth()

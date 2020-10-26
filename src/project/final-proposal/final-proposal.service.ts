@@ -36,6 +36,14 @@ export class FinalProposalService {
     });
   }
 
+  async activateProposal(proposal: FinalProposal): Promise<boolean> {
+    if (proposal.status !== FinalProposalStatus.Declined) {
+      return false;
+    }
+    await this.finalProposalRepository.update({ id: proposal.id }, { status: FinalProposalStatus.Pending });
+    return true;
+  }
+
   async findProposalFromProjectId(id: string): Promise<FinalProposal> {
     const proposal = await this.finalProposalRepository.createQueryBuilder('final_proposal')
       .leftJoinAndSelect('final_proposal.project', 'project')
