@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ApiImplicitParam } from '@nestjs/swagger/dist/decorators/api-implicit-param.decorator';
 
 import { Estimate } from './entities/estimate.entity';
@@ -96,6 +96,19 @@ export class EstimateController {
       return this.estimateService.getEmptyEstimateDtoFromProject(project);
     }
     return estimate;
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(RolesGuard)
+  @Roles([UserRole.Customer])
+  @Post(':projectId/activate-estimate')
+  @ApiParam({ name: 'projectId', required: true })
+  @ApiOkResponse({ type: SuccessResponse })
+  async activateEstimate(@Param('projectId') projectId: string): Promise<SuccessResponse> {
+    const estimate = await this.estimateService.findEstimateFromProjectId(projectId);
+    if (!estimate) { return new SuccessResponse(false); }
+    const result = await this.estimateService.activateEstimate(estimate);
+    return new SuccessResponse(result);
   }
 
   @ApiBearerAuth()

@@ -655,3 +655,29 @@ projectId: string
   "success": "boolean"
 }
 ```
+
+##### POST /api/project/{projectId}/activate-estimate
+* activate declined estimate to reviewing state
+```
+# params
+projectId: string
+```
+* returns success response
+```
+{
+  "success": "boolean"
+}
+```
+
+##### POST /api/project/{projectId}/activate-proposal
+* activate declined proposal to reviewing state
+```
+# params
+projectId: string
+```
+* returns success response
+```
+{
+  "success": "boolean"
+}
+```
