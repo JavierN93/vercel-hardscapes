@@ -79,7 +79,7 @@ export class EstimateService {
 
   getSiteVisitPendingSchedules(): Promise<Schedule[]> {
     const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 2); // 48 hours
+    tomorrow.setDate(tomorrow.getDate() + 1); // 24 hours
     return this.scheduleRepository.find({
       relations: ['estimate', 'estimate.project', 'estimate.project.customer', 'estimate.project.customer.user', 'estimate.project.consultant', 'estimate.project.consultant.user'],
       where: {
