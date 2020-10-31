@@ -59,7 +59,11 @@ export class FinalProposalService {
       proposal.costEstimates = [];
       proposal.layouts.forEach(layout => {
         const type = layout.type;
-        const iEstimate = costEstimates.findIndex(e => e.type === type && e.comment === layout.comment);
+        // HOTFIX: there shou
+        let iEstimate = costEstimates.findIndex(e => e.type === type && e.comment === layout.comment);
+        if (iEstimate === -1) {
+          iEstimate = costEstimates.findIndex(e => e.type === type);
+        }
         proposal.costEstimates.push(costEstimates[iEstimate]);
         costEstimates.splice(iEstimate, 1);
       });
