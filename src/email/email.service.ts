@@ -208,7 +208,7 @@ export class EmailService {
 
   async sendLegalTermsSignReminderEmail(user: User): Promise<boolean> {
     const name = user.firstName;
-    const legalTermsPageLink = this.makeRedirectLink(user, `${process.env.PRODUCTION_HOST}/contractor/onboarding/legal`);
+    const legalTermsPageLink = this.makeRedirectLink(user, `contractor/onboarding/legal`);
     return this.sendMail(EmailType.LegalTermsSignReminder, user.email, {
       name,
       legalTermsPageLink,
