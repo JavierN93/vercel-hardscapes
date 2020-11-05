@@ -64,8 +64,7 @@ export class FinalProposalService {
         if (iEstimate === -1) {
           // TODO: there should be a relation between a cost estimate and a layout
           iEstimate = costEstimates.findIndex(e => {
-            return e.type === type &&
-              (e.comment.indexOf(layout.comment) || layout.comment.indexOf(e.comment));
+            return e.type === type;
           });
         }
         proposal.costEstimates.push(costEstimates[iEstimate]);
