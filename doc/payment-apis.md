@@ -10,7 +10,24 @@
   "updatedAt": "string",
   "project": "Project",
   "name": "string",
-  "payWithCash": "boolean",
+  "needConfirm": "boolean",
+  "amount": "number",
+  "comment": "string",
+  "paidDate": "date",
+}
+```
+
+##### POST /api/payment/{milestoneId}/request-finance-pay
+* Request milestone payment with finance (customer authentication required)
+* Returns Milestone object
+```
+{
+  "id": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "project": "Project",
+  "name": "string",
+  "needConfirm": "boolean",
   "amount": "number",
   "comment": "string",
   "paidDate": "date",
@@ -27,7 +44,24 @@
   "updatedAt": "string",
   "project": "Project",
   "name": "string",
-  "payWithCash": "boolean",
+  "needConfirm": "boolean",
+  "amount": "number",
+  "comment": "string",
+  "paidDate": "date",
+}
+```
+
+###### POST /api/payment/{milestoneId}/confirm-finance-pay
+* Set milestone as paid with financing
+* Returns Milestone object
+```
+{
+  "id": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "project": "Project",
+  "name": "string",
+  "needConfirm": "boolean",
   "amount": "number",
   "comment": "string",
   "paidDate": "date",
@@ -44,7 +78,7 @@
   "updatedAt": "string",
   "project": "Project",
   "name": "string",
-  "payWithCash": "boolean",
+  "needConfirm": "boolean",
   "amount": "number",
   "comment": "string",
   "paidDate": "date",
@@ -81,7 +115,7 @@ milestoneId: string
   "updatedAt": "string",
   "project": "Project",
   "name": "string",
-  "payWithCash": "boolean",
+  "needConfirm": "boolean",
   "amount": "number",
   "comment": "string",
   "paidDate": "date",
@@ -101,7 +135,7 @@ milestoneId: string
   "updatedAt": "string",
   "project": "Project",
   "name": "string",
-  "payWithCash": "boolean",
+  "needConfirm": "boolean",
   "amount": "number",
   "comment": "string",
   "paidDate": "date",
