@@ -9,6 +9,9 @@ export class PaymentDto {
 
   @ApiProperty()
   cash: number;
+
+  @ApiProperty()
+  finance: number;
 }
 
 export class PaymentByDateDto extends PaymentDto {

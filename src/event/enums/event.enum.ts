@@ -44,4 +44,6 @@ export enum EventType {
   ContractorRequestedMilestoneReleaseEvent = 'CONTRACTOR_REQUESTED_MILESTONE_RELEASE_EVENT',
   ConsultantRequestedMilestoneReleaseEvent = 'CONSULTANT_REQUESTED_MILESTONE_RELEASE_EVENT',
   AdminPaidSubContractMilestoneEvent = 'ADMIN_PAID_SUB_CONTRACT_MILESTONE_EVENT',
+  CustomerRequestedFinancePaymentEvent = 'CUSTOMER_REQUESTED_FINANCE_PAYMENT_EVENT',
+  ConsultantConfirmedFinancePayment = 'ADMIN_CONFIRMED_FINANCE_PAYMENT',
 }

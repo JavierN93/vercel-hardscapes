@@ -105,6 +105,15 @@ export class CustomerRequestedCashPaymentEvent extends AddEvent {
   }
 }
 
+export class CustomerRequestedFinancePaymentEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, milestone: Milestone) {
+    super(EventType.CustomerRequestedFinancePaymentEvent, user, 'Customer requested to pay a milestone with finance.');
+    this.meta = milestone;
+  }
+}
+
 export class ConsultantRequestedToReleaseMilestoneEvent extends AddEvent {
   meta: any;
 
@@ -119,6 +128,15 @@ export class ConsultantConfirmedCashPaymentEvent extends AddEvent {
 
   constructor(user: User, milestone: Milestone) {
     super(EventType.ConsultantConfirmedCashPayment, user, 'Consultant has confirmed your cash payment.');
+    this.meta = milestone;
+  }
+}
+
+export class ConsultantConfirmedFinancePaymentEvent extends AddEvent {
+  meta: any;
+
+  constructor(user: User, milestone: Milestone) {
+    super(EventType.ConsultantConfirmedFinancePayment, user, 'Admin has confirmed your finance payment.');
     this.meta = milestone;
   }
 }

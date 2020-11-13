@@ -49,7 +49,7 @@ export class Milestone extends SoftDelete {
 
   @ApiProperty()
   @Column({ nullable: true, default: false })
-  payWithCash: boolean;
+  needConfirm: boolean;
 
   @OneToMany(() => PaymentAddOn, addOn => addOn.milestone)
   paymentAddOns: PaymentAddOn[];
