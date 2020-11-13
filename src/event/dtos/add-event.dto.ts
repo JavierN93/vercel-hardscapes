@@ -136,7 +136,7 @@ export class ConsultantConfirmedFinancePaymentEvent extends AddEvent {
   meta: any;
 
   constructor(user: User, milestone: Milestone) {
-    super(EventType.ConsultantConfirmedFinancePayment, user, 'Admin has confirmed your finance payment.');
+    super(EventType.ConsultantConfirmedFinancePayment, user, 'Consultant has confirmed your finance payment.');
     this.meta = milestone;
   }
 }
