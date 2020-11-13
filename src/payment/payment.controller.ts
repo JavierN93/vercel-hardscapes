@@ -58,16 +58,17 @@ export class PaymentController {
   @Roles([UserRole.Customer])
   @Post(':milestoneId/request-cash-pay')
   @ApiOkResponse({ type: Milestone })
-  async requestCashPayment(@Request() request, @Param('milestoneId') milestoneId: string): Promise<Milestone> {
-    const userId = request.user.id;
-    const [, milestone] = await this.validateCustomerMilestone(userId, milestoneId);
-    milestone.payWithCash = true;
-    await this.projectService.updateMilestone(milestone);
-    const admins = await this.userService.findSuperAdmins();
-    const project = await this.projectService.findProjectById(milestone.project.id);
-    const notificationRecipients = admins.find(admin => admin.id === project.consultant.user.id) ? admins : [...admins, project.consultant.user];
-    await this.notificationService.customerRequestedCashPaymentEvent(notificationRecipients, milestone);
-    return milestone;
+  requestCashPayment(@Param('milestoneId') milestoneId: string): Promise<Milestone> {
+    return this.requestPaymentConfirmation(milestoneId, PaymentMethod.Cash);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.Customer])
+  @Post(':milestoneId/request-finance-pay')
+  @ApiOkResponse({ type: Milestone })
+  requestFinancePayment(@Param('milestoneId') milestoneId: string): Promise<Milestone> {
+    return this.requestPaymentConfirmation(milestoneId, PaymentMethod.Finance);
   }
 
   @ApiBearerAuth()
@@ -91,7 +92,7 @@ export class PaymentController {
     }
     milestone.status = MilestoneStatus.Released;
     milestone.paidDate = new Date();
-    milestone.payWithCash = true;
+    milestone.needsConfirm = true;
     milestone.paymentMethod = PaymentMethod.Cash;
     await this.projectService.updateMilestone(milestone);
     return milestone;
@@ -252,19 +253,20 @@ export class PaymentController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.Consultant])
+  @Roles([UserRole.SuperAdmin])
   @Post(':milestoneId/confirm-cash-pay')
   @ApiOkResponse({ type: Milestone })
-  async payWithCash(@Param('milestoneId') milestoneId: string): Promise<Milestone> {
-    const milestone = await this.projectService.findMilestoneById(milestoneId);
-    const project = await this.projectService.findProjectById(milestone.project.id);
-    if (milestone.status === MilestoneStatus.Released) {
-      return milestone;
-    }
-    await this.projectService.setMilestonePaid(milestone, PaymentMethod.Cash);
-    await this.notificationService.consultantConfirmedCashPaymentEvent(project.user, milestone);
-    this.sendMilestonePaymentEmail(project, milestone);
-    return milestone;
+  confirmCashPay(@Param('milestoneId') milestoneId: string): Promise<Milestone> {
+    return this.confirmPayment(milestoneId, PaymentMethod.Cash);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([UserRole.SuperAdmin])
+  @Post(':milestoneId/confirm-finance-pay')
+  @ApiOkResponse({ type: Milestone })
+  confirmFinancePay(@Param('milestoneId') milestoneId: string): Promise<Milestone> {
+    return this.confirmPayment(milestoneId, PaymentMethod.Finance);
   }
 
   @ApiBearerAuth()
@@ -501,5 +503,38 @@ export class PaymentController {
         break;
       }
     }
+  }
+
+  private async confirmPayment(milestoneId: string, paymentMethod: PaymentMethod): Promise<Milestone> {
+    const milestone = await this.projectService.findMilestoneById(milestoneId);
+    const project = await this.projectService.findProjectById(milestone.project.id);
+    if (milestone.status === MilestoneStatus.Released) {
+      return milestone;
+    }
+    await this.projectService.setMilestonePaid(milestone, paymentMethod);
+    if (paymentMethod === PaymentMethod.Cash) {
+      await this.notificationService.consultantConfirmedCashPaymentEvent(project.user, milestone);
+    } else if (paymentMethod === PaymentMethod.Finance) {
+      await this.notificationService.consultantConfirmedFinancePaymentEvent(project.user, milestone);
+    }
+    this.sendMilestonePaymentEmail(project, milestone);
+    return milestone;
+
+  }
+
+  private async requestPaymentConfirmation(milestoneId: string, paymentMethod: PaymentMethod) {
+    const milestone = await this.projectService.findMilestoneById(milestoneId);
+    milestone.needsConfirm = true;
+    milestone.paymentMethod = paymentMethod;
+    await this.projectService.updateMilestone(milestone);
+    const admins = await this.userService.findSuperAdmins();
+    const project = await this.projectService.findProjectById(milestone.project.id);
+    const notificationRecipients = admins.find(admin => admin.id === project.consultant.user.id) ? admins : [...admins, project.consultant.user];
+    if (paymentMethod === PaymentMethod.Cash) {
+      await this.notificationService.customerRequestedCashPaymentEvent(notificationRecipients, milestone);
+    } else if (paymentMethod === PaymentMethod.Finance) {
+      await this.notificationService.customerRequestedFinancePaymentEvent(notificationRecipients, milestone);
+    }
+    return milestone;
   }
 }

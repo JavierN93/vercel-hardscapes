@@ -41,6 +41,8 @@ import {
   ContractorSetupPaymentEvent,
   SitePlanUpdatedEvent,
   ConsultantRequestedMilestoneReleaseEvent,
+  CustomerRequestedFinancePaymentEvent,
+  ConsultantConfirmedFinancePaymentEvent,
 } from '../event/dtos/add-event.dto';
 import { Estimate } from '../project/estimate/entities/estimate.entity';
 import { User } from '../users/entities/user.entity';
@@ -134,6 +136,15 @@ export class NotificationService {
     }));
   }
 
+  async customerRequestedFinancePaymentEvent(users: User[], milestone: Milestone): Promise<Event[]> {
+    return Promise.all(users.map(async user => {
+      const payload = new CustomerRequestedFinancePaymentEvent(user, milestone);
+      const event: Event = await this.eventService.addEvent(payload);
+      this.socketService.event$.next(event);
+      return event;
+    }));
+  }
+
   async consultantRequestedToReleaseMilestoneEvent(user: User, milestone: Milestone): Promise<Event> {
     const payload = new ConsultantRequestedToReleaseMilestoneEvent(user, milestone);
     const event: Event = await this.eventService.addEvent(payload);
@@ -143,6 +154,13 @@ export class NotificationService {
 
   async consultantConfirmedCashPaymentEvent(user: User, milestone: Milestone): Promise<Event> {
     const payload = new ConsultantConfirmedCashPaymentEvent(user, milestone);
+    const event: Event = await this.eventService.addEvent(payload);
+    this.socketService.event$.next(event);
+    return event;
+  }
+
+  async consultantConfirmedFinancePaymentEvent(user: User, milestone: Milestone): Promise<Event> {
+    const payload = new ConsultantConfirmedFinancePaymentEvent(user, milestone);
     const event: Event = await this.eventService.addEvent(payload);
     this.socketService.event$.next(event);
     return event;

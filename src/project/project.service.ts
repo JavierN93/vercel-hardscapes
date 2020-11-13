@@ -119,10 +119,12 @@ export class ProjectService {
     const stripe = rawResult.find(r => r.paymentMethod === PaymentMethod.CreditCard);
     const ach = rawResult.find(r => r.paymentMethod === PaymentMethod.Bank);
     const cash = rawResult.find(r => r.paymentMethod === PaymentMethod.Cash);
+    const finance = rawResult.find(r => r.paymentMethod === PaymentMethod.Finance);
     return {
       stripe: stripe ? Number(stripe.amount) : 0,
       ach: ach ? Number(ach.amount) : 0,
       cash: cash ? Number(cash.amount) : 0,
+      finance: finance ? Number(finance.amount) : 0,
     };
   }
 
@@ -142,11 +144,13 @@ export class ProjectService {
       const stripe = grouped[key].find(g => g.paymentMethod === PaymentMethod.CreditCard);
       const ach = grouped[key].find(g => g.paymentMethod === PaymentMethod.Bank);
       const cash = grouped[key].find(g => g.paymentMethod === PaymentMethod.Cash);
+      const finance = grouped[key].find(g => g.paymentMethod === PaymentMethod.Finance);
       return {
         date: key,
         stripe: stripe ? Number(stripe.amount) : 0,
         ach: ach ? Number(ach.amount) : 0,
         cash: cash ? Number(cash.amount) : 0,
+        finance: finance ? Number(finance.amount) : 0,
       };
     });
   }
@@ -364,7 +368,7 @@ export class ProjectService {
     const finalMilestone = project.milestones.find(milestone => milestone.order === MilestoneType.Final);
     finalMilestone.comment = comment;
     finalMilestone.amount = amount;
-    finalMilestone.payWithCash = true;
+    finalMilestone.needsConfirm = true;
     return this.milestoneRepository.save(finalMilestone);
   }
 
