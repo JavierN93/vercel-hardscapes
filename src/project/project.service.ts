@@ -368,7 +368,7 @@ export class ProjectService {
     const finalMilestone = project.milestones.find(milestone => milestone.order === MilestoneType.Final);
     finalMilestone.comment = comment;
     finalMilestone.amount = amount;
-    finalMilestone.needConfirm = true;
+    finalMilestone.needsConfirm = true;
     return this.milestoneRepository.save(finalMilestone);
   }
 

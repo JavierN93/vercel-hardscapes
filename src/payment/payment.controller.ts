@@ -92,7 +92,7 @@ export class PaymentController {
     }
     milestone.status = MilestoneStatus.Released;
     milestone.paidDate = new Date();
-    milestone.needConfirm = true;
+    milestone.needsConfirm = true;
     milestone.paymentMethod = PaymentMethod.Cash;
     await this.projectService.updateMilestone(milestone);
     return milestone;
@@ -524,7 +524,7 @@ export class PaymentController {
 
   private async requestPaymentConfirmation(milestoneId: string, paymentMethod: PaymentMethod) {
     const milestone = await this.projectService.findMilestoneById(milestoneId);
-    milestone.needConfirm = true;
+    milestone.needsConfirm = true;
     milestone.paymentMethod = paymentMethod;
     await this.projectService.updateMilestone(milestone);
     const admins = await this.userService.findSuperAdmins();
