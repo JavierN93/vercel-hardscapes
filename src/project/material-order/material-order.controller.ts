@@ -7,7 +7,7 @@ import { ProjectService } from '../project.service';
 import { TagService } from '../../tag/tag.service';
 import { FinalProposalService } from '../final-proposal/final-proposal.service';
 import { MaterialOrderGroupDto } from './dtos/material-order-group.dto';
-import { MaterialOrderGroupType } from './enums';
+import { AmountType, MaterialOrderGroupType } from './enums';
 import { TagCategory } from '../../tag/enums/tag.enum';
 
 @ApiTags('Choose / Order Materials')
@@ -60,23 +60,37 @@ export class MaterialOrderController {
     const orderGroups = await this.materialOrderService.findOrderGroupsByProjectId(projectId);
     if (!orderGroups || !orderGroups.length) {
       const proposal = await this.finalProposalService.findProposalFromProjectId(projectId);
-      const accessoryOrderGroups = proposal.layouts.map(layout => [{
+      const materialOrderItem = {
+        amount: "my amount",
+        amountType: AmountType.Bags,
+        brand: 'my brand',
+        color: 'my color',
+        comment: 'my comment',
+        id: '123',
+        name: 'my name',
+        style: 'my style',
+        createdAt: 's',
+        updatedAt: '123',
+        deletedAt: null,
+        requestDate: new Date(),
+      };
+      const accessoryOrderGroups = proposal.layouts.map(layout => ({
         items: [],
         groupType: MaterialOrderGroupType.Layout,
         layoutType: layout.type,
-      }, {
-        items: [],
-        groupType: MaterialOrderGroupType.LayoutAccessory,
-        layoutType: layout.type,
-      }]);
+      }));
       return [
         {
-          items: [],
+          items: [materialOrderItem],
           groupType: MaterialOrderGroupType.Bulk,
         },
-        ...accessoryOrderGroups.reduce((merged, m) => merged.concat(m)),
+        ...accessoryOrderGroups,
         {
-          items: [],
+          items: [materialOrderItem, materialOrderItem],
+          groupType: MaterialOrderGroupType.LayoutAccessory,
+        },
+        {
+          items: [materialOrderItem],
           groupType: MaterialOrderGroupType.Other,
         },
       ];
