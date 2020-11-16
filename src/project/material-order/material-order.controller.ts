@@ -60,21 +60,21 @@ export class MaterialOrderController {
     const orderGroups = await this.materialOrderService.findOrderGroupsByProjectId(projectId);
     if (!orderGroups || !orderGroups.length) {
       const proposal = await this.finalProposalService.findProposalFromProjectId(projectId);
-      const accessoryOrderGroups = proposal.layouts.map(layout => [{
+      const accessoryOrderGroups = proposal.layouts.map(layout => ({
         items: [],
         groupType: MaterialOrderGroupType.Layout,
         layoutType: layout.type,
-      }, {
-        items: [],
-        groupType: MaterialOrderGroupType.LayoutAccessory,
-        layoutType: layout.type,
-      }]);
+      }));
       return [
         {
           items: [],
           groupType: MaterialOrderGroupType.Bulk,
         },
-        ...accessoryOrderGroups.reduce((merged, m) => merged.concat(m)),
+        ...accessoryOrderGroups,
+        {
+          items: [],
+          groupType: MaterialOrderGroupType.LayoutAccessory,
+        },
         {
           items: [],
           groupType: MaterialOrderGroupType.Other,
