@@ -7,7 +7,7 @@ import { ProjectService } from '../project.service';
 import { TagService } from '../../tag/tag.service';
 import { FinalProposalService } from '../final-proposal/final-proposal.service';
 import { MaterialOrderGroupDto } from './dtos/material-order-group.dto';
-import { AmountType, MaterialOrderGroupType } from './enums';
+import { MaterialOrderGroupType } from './enums';
 import { TagCategory } from '../../tag/enums/tag.enum';
 
 @ApiTags('Choose / Order Materials')
@@ -60,20 +60,6 @@ export class MaterialOrderController {
     const orderGroups = await this.materialOrderService.findOrderGroupsByProjectId(projectId);
     if (!orderGroups || !orderGroups.length) {
       const proposal = await this.finalProposalService.findProposalFromProjectId(projectId);
-      const materialOrderItem = {
-        amount: "my amount",
-        amountType: AmountType.Bags,
-        brand: 'my brand',
-        color: 'my color',
-        comment: 'my comment',
-        id: '123',
-        name: 'my name',
-        style: 'my style',
-        createdAt: 's',
-        updatedAt: '123',
-        deletedAt: null,
-        requestDate: new Date(),
-      };
       const accessoryOrderGroups = proposal.layouts.map(layout => ({
         items: [],
         groupType: MaterialOrderGroupType.Layout,
@@ -81,16 +67,16 @@ export class MaterialOrderController {
       }));
       return [
         {
-          items: [materialOrderItem],
+          items: [],
           groupType: MaterialOrderGroupType.Bulk,
         },
         ...accessoryOrderGroups,
         {
-          items: [materialOrderItem, materialOrderItem],
+          items: [],
           groupType: MaterialOrderGroupType.LayoutAccessory,
         },
         {
-          items: [materialOrderItem],
+          items: [],
           groupType: MaterialOrderGroupType.Other,
         },
       ];
