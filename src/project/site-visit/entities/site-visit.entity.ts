@@ -23,6 +23,10 @@ export class SiteVisit extends SoftDelete {
   @OneToOne(() => Project, project => project.siteVisit)
   project: Project;
 
+  @Column({ type: 'text', default: '', nullable: true })
+  @ApiProperty()
+  propertyOverview: string;
+
   @Column({ type: 'text', array: true, default: undefined, nullable: true })
   @ApiProperty({ type: [String] })
   attachments: string[];

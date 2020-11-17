@@ -4,6 +4,10 @@ import { DrainageType, MachineAccessType, PreferredColor, PropertyGradeType, Soi
 import { SiteVisitAccessory, SiteVisitAccessoryWithType } from '../entities/site-visit.entity';
 
 export class UpdateSiteVisitDto {
+
+  @ApiProperty()
+  propertyOverView: string;
+
   @ApiProperty({ type: [String] })
   attachments: string[];
 
