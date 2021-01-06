@@ -79,6 +79,10 @@ export class PaymentController {
   async setMilestoneAsPaid(@Request() request, @Param('milestoneId') milestoneId: string): Promise<Milestone> {
     const milestone = await this.projectService.findMilestoneById(milestoneId);
     const project = await this.projectService.findProjectById(milestone.project.id);
+    if (project.milestones.length === 1 && milestone.status === MilestoneStatus.Released) {
+      // "continue-to-payment" case
+      throw new BadRequestException('The milestone is already paid.');
+    }
     if (milestone.order === MilestoneType.Start) {
       const depositMilestone = project.milestones.find(m => m.order === MilestoneType.Deposit);
       if (depositMilestone.status !== MilestoneStatus.Released) {
@@ -86,7 +90,7 @@ export class PaymentController {
       }
     } else if (milestone.order === MilestoneType.Final) {
       const startMilestone = project.milestones.find(m => m.order === MilestoneType.Start);
-      if (startMilestone.status !== MilestoneStatus.Released) {
+      if (startMilestone && startMilestone.status !== MilestoneStatus.Released) {
         throw new BadRequestException('Start milestone should be paid first.');
       }
     }
