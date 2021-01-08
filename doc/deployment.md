@@ -54,20 +54,18 @@ postgres=# \c jobhub
 postgres=# create extension "uuid-ossp";
 ```
 #### 4. Configure git
-You will have to save git credential for later use.
-```
-git config --global credential.helper 'store --file ~/.my-credentials'
-```
+Generate and add github [deploy key](https://github.com/Jobhubgroup/hardscapes-api/settings/keys) to access to the git repository from the production server.
+For more information please read [this](https://docs.github.com/en/free-pro-team@latest/developers/overview/managing-deploy-keys).
 #### 5. Clone repository
 Clone `jobhub-api` repository to home directory(`/home/ubuntu/`).
 ```
-git clone https://github.com/Jobhubgroup/job-hub-api.git job-hub-api
+git clone git://github.com:Jobhubgroup/job-hub-api.git job-hub-api
 ```
 #### 6. Copy deploy script
 ```
 mkdir /home/ubuntu/jobs
-cp /home/ubuntu/job-hub-api/deployment/deploy.sh /home/ubuntu/jobs/
-chmod +x /home/ubuntu/jobs/deploy.sh
+cp /home/ubuntu/job-hub-api/deployment/deploy-{jd|uh}.sh /home/ubuntu/jobs/
+chmod +x /home/ubuntu/jobs/deploy-{jd|uh}.sh
 ```
 #### 7. Add environment variables
 Use vim or other text edit `/etc/environment` file.<br>
@@ -90,7 +88,7 @@ sudo pm2 startup
 sudo pm2 save
 ```
 
-The production server is up now and circleci will execute deploy script once there is any update in `prod` branch.
+The production server is up now and github action will be used for the production deployment.
 
 #### 9. Configure aws cli
 ```
@@ -100,9 +98,14 @@ aws configure
 #### 10. Configure database backup script
 Copy database backup script.
 ```
-cp /home/ubuntu/job-hub-api/deployment/backupdb.sh /home/ubuntu/jobs/
-chmod +x /home/ubuntu/jobs/backupdb.sh
-sudo ln -s /home/ubuntu/jobs/backupdb.sh /usr/bin/backupdb
+cp /home/ubuntu/job-hub-api/deployment/backupdb-{jd|uh}.sh /home/ubuntu/jobs/
+chmod +x /home/ubuntu/jobs/backupdb-{jd|uh}.sh
+sudo ln -s /home/ubuntu/jobs/backupdb-{jd|uh}.sh /usr/bin/backupdb
+```
+
+#### 11. Install DB backup cronjob
+```
+sudo ln -s /home/ubuntu/jobs/backupdb-{jd|uh}.sh /etc/cron.daily/backupdb
 ```
 
 ## Troubleshooting
