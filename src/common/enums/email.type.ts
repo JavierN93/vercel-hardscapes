@@ -4,6 +4,7 @@ export enum EmailType {
   MessageReceived = 'MESSAGE_RECEIVED',
   PasswordReset = 'RESET_PASSWORD',
   Invitation = 'INVITATION',
+  ReceivedPartnerApplication = 'RECEIVED_PARTNER_APPLICATION',
 
 // customer emails
   ProjectCreated = 'PROJECT_CREATED',
@@ -26,6 +27,8 @@ export enum EmailType {
   ReceivedFinalMilestoneWithHold = 'RECEIVED_FINAL_MILESTONE_WITH_HOLD',
 
 // contractor emails
+  BasicProfileSent = 'BASIC_PROFILE_SENT',
+  ContractorProfileApproved = 'CONTRACTOR_PROFILE_APPROVED',
   LegalTermsSignReminder = 'LEGAL_TERMS_SIGN_REMINDER',
   PaymentSetupReminder = 'PAYMENT_SETUP_REMINDER',
   InvitedToProject = 'INVITED_TO_PROJECT',

@@ -126,6 +126,7 @@ export class ContractorController {
       await this.notificationService.contractorSignedLegalTermsEvent(admins, user);
     }
     await this.contractorService.updateContractorProfile(user.contractorProfile);
+    await this.emailService.sendPaymentSetupReminderEmail(user);
     return new SuccessResponse(true);
   }
 
@@ -155,6 +156,7 @@ export class ContractorController {
     admins.forEach(admin => {
       this.emailService.sendContractorUpdatedProfileEmail(admin, user);
     });
+    await this.emailService.sendBasicProfileSentEmail(user.firstName, user.email);
     return this.userService.findUserById(user.id);
   }
 
@@ -201,6 +203,7 @@ export class ContractorController {
     user.contractorProfile.status = ContractorStatus.ReputationCheckPassed;
     user.contractorProfile.contractorClass = body.rate;
     await this.contractorService.updateContractorProfile(user.contractorProfile);
+    await this.emailService.sendContractorProfileApprovedEmail(user);
     await this.notificationService.adminApprovedBasicProfileEvent(user);
     return new SuccessResponse(true);
   }
@@ -259,6 +262,7 @@ export class ContractorController {
   @ApiOkResponse({ type: SuccessResponse })
   async partnerRequest(@Body() body: ExternalContactRequestDto): Promise<SuccessResponse> {
     try {
+      await this.emailService.sendReceivedPartnerApplicationEmail(body.fullName, body.email);
       await this.slackService.sendNotification(SlackMessageType.PartnerRequest, body);
     } catch (e) {
       console.log('partner request message error: ' + e);

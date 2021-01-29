@@ -104,6 +104,10 @@ export class EmailService {
     });
   }
 
+  async sendReceivedPartnerApplicationEmail(name: string, recipient: string): Promise<boolean> {
+    return this.sendMail(EmailType.ReceivedPartnerApplication, recipient, { name });
+  }
+
   async sendSiteVisitRequestProposalEmail(customerName: string, date: Date, project: Project): Promise<boolean> {
     const user = project.consultant.user;
     const siteVisitDate = convertUtcToEstString(new Date(date));
@@ -116,6 +120,20 @@ export class EmailService {
       confirmVisitLink,
       rescheduleLink,
     }, project);
+  }
+
+  async sendBasicProfileSentEmail(name: string, recipient: string): Promise<boolean> {
+    return this.sendMail(EmailType.BasicProfileSent, recipient, { name });
+  }
+
+  async sendContractorProfileApprovedEmail(user: User): Promise<boolean> {
+    const legalTermsLink = this.makeRedirectLink(user, 'contractor/onboarding/legal');
+    return this.sendMail(EmailType.ContractorProfileApproved, user.email, { name: user.firstName, legalTermsLink });
+  }
+
+  async sendPaymentSetupReminderEmail(user: User): Promise<boolean> {
+    const paymentSetupLink = this.makeRedirectLink(user, 'contractor/onboarding/payment-setup');
+    return this.sendMail(EmailType.PaymentSetupReminder, user.email, { name: user.firstName, paymentSetupLink });
   }
 
   async sendDepositMadeEmail(project: Project): Promise<boolean> {
@@ -212,15 +230,6 @@ export class EmailService {
     return this.sendMail(EmailType.LegalTermsSignReminder, user.email, {
       name,
       legalTermsPageLink,
-    });
-  }
-
-  async sendPaymentSetupReminderEmail(user: User): Promise<boolean> {
-    const name = user.firstName;
-    const paymentSetupPageLink = `${process.env.PRODUCTION_HOST}/contractor/onboarding/payment-setup`;
-    return this.sendMail(EmailType.PaymentSetupReminder, user.email, {
-      name,
-      paymentSetupPageLink,
     });
   }
 
