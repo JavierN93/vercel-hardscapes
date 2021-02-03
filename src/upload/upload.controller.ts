@@ -35,7 +35,8 @@ export class UploadController {
         meta.width = `${f.getWidth()}`;
         meta.height = `${f.getHeight()}`;
       }
-      const url = await this.uploadService.uploadToS3(file, `${bucket}/${targetFileName}_${file.originalname}`, meta);
+      const fileExtension = '.'+file.originalname.split('.').pop();
+      const url = await this.uploadService.uploadToS3(file, `${bucket}/${targetFileName}`+fileExtension, meta);
       return { url };
     } catch (e) {
       throw new BadRequestException('Failed to upload image');
