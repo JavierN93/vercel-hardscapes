@@ -8,6 +8,7 @@ import { ApiFile } from '../common/decorators/api-file.decorator';
 import { UploadService } from './upload.service';
 import { UploadResponse } from '../common/models/upload';
 import { S3Folder } from './enums/s3-folder.enum';
+import { getFileExtension } from '../common/utils/string.util';
 
 @ApiTags('File Management')
 @Controller('api/upload')
@@ -35,8 +36,8 @@ export class UploadController {
         meta.width = `${f.getWidth()}`;
         meta.height = `${f.getHeight()}`;
       }
-      const fileExtension = '.'+file.originalname.split('.').pop();
-      const url = await this.uploadService.uploadToS3(file, `${bucket}/${targetFileName}`+fileExtension, meta);
+      const fileExtension = getFileExtension(file.originalname);
+      const url = await this.uploadService.uploadToS3(file, `${bucket}/${targetFileName}${fileExtension}`, meta);
       return { url };
     } catch (e) {
       throw new BadRequestException('Failed to upload image');

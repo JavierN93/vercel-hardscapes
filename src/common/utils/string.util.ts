@@ -50,3 +50,8 @@ export function splitName(fullName: string): [string, string] {
   const firstName = names.slice(0, names.length - 1).join(' ');
   return [firstName, lastName];
 }
+
+export function getFileExtension(filename: string): string {
+    const lastIndex = filename.lastIndexOf('.');
+    return lastIndex < 1 ? '' : filename.substr(lastIndex);
+}
