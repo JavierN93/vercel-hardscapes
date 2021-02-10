@@ -9,11 +9,12 @@ import { SlackModule } from '../slack/slack.module';
 import { ContractorController } from './contractor.controller';
 import { ContractorService } from './contractor.service';
 import { ContractorProfile } from '../users/entities/contractor-profile.entity';
+import { HardscapeCrew } from '../users/entities/hardscape-crew.entity';
 
 @Module({
   controllers: [ContractorController],
   imports: [
-    TypeOrmModule.forFeature([ContractorProfile]),
+    TypeOrmModule.forFeature([ContractorProfile, HardscapeCrew]),
     EmailModule,
     UsersModule,
     PortfolioModule,

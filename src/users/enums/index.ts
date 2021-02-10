@@ -52,3 +52,10 @@ export enum ContractorClass {
   A = 'A',
   B = 'B',
 }
+
+export enum ExperienceLevel {
+  Novice = 'NOVICE',
+  Intermediate = 'INTERMEDIATE',
+  Advanced = 'ADVANCED',
+  Expert = 'EXPERT',
+}

@@ -2,14 +2,13 @@ import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { User } from './user.entity';
-import { Portfolio } from '../../portfolio/entities/portfolio.entity';
 import { SubContract } from '../../project/sub-contract/entities/sub-contract.entity';
 import { SoftDelete } from '../../common/core/soft-delete';
 import { MaterialType } from '../../idea-board/enums';
 import { ContractorClass, ContractorStatus, HardscapingPropertyType } from '../enums';
 import { ProjectAccessoryType } from '../../project/enums';
-import { PortfolioDto } from '../../portfolio/dtos/portfolio.dto';
 import { NumericRangeTransformer } from '../../common/utils/typeorm.util';
+import { HardscapeCrew } from './hardscape-crew.entity';
 
 @Entity('contractor_profile')
 export class ContractorProfile extends SoftDelete {
@@ -67,6 +66,19 @@ export class ContractorProfile extends SoftDelete {
   @Column({ default: '' })
   timePerProject: string;
 
+
+  @ApiProperty()
+  @Column({ default: '' })
+  excavationEquipmentComment: string;
+
+  @ApiProperty()
+  @Column({ default: '' })
+  truckComment: string;
+
+  @ApiProperty()
+  @Column({ default: '' })
+  compactionEquipmentComment: string;
+
   @ApiProperty()
   @Column({ default: '' })
   instagramLink: string;
@@ -82,6 +94,9 @@ export class ContractorProfile extends SoftDelete {
   @ApiProperty()
   @Column({ default: '' })
   otherSocialLink: string;
+
+  @OneToMany(() => HardscapeCrew, hardscapeCrew => hardscapeCrew.contractorProfile)
+  hardscapeCrews: HardscapeCrew[];
 
   @ApiProperty({ enum: ContractorStatus })
   @Column({ type: 'enum', enum: ContractorStatus, default: ContractorStatus.InvitationSent })
@@ -126,10 +141,6 @@ export class ContractorProfile extends SoftDelete {
   @ApiProperty()
   @Column({ nullable: true, default: undefined })
   bankAccountAddress: string;
-
-  @ApiProperty({ type: () => PortfolioDto, isArray: true })
-  @OneToMany(() => Portfolio, portfolio => portfolio.contractorProfile)
-  portfolios: Portfolio[];
 
   @OneToMany(() => SubContract, project => project.contractor)
   projects: SubContract[];
