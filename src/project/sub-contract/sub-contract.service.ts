@@ -9,6 +9,7 @@ import { CustomPaymentItem } from '../../contractor/entities/custom-payment-item
 import { SubContractMilestone } from './entities/sub-contract-milestone.entity';
 import { SitePlan } from '../../contractor/entities/site-plan.entity';
 import { MaterialReturn } from './entities/material-return.entity';
+import { subContractMilestoneComment } from './data';
 
 @Injectable()
 export class SubContractService {
@@ -160,8 +161,8 @@ export class SubContractService {
   createMilestones(subContract: SubContract): Promise<SubContractMilestone[]> {
     const sitePlan = subContract.sitePlan;
     const totalPrice = SubContractService.totalPriceFromSitePlan(sitePlan);
-    const depositMilestone = new SubContractMilestone(subContract, SubContractMilestoneType.Deposit, totalPrice / 2, '50% payment of the project value to start the project.');
-    const finalMilestone = new SubContractMilestone(subContract, SubContractMilestoneType.Final, totalPrice / 2, 'Last 50% on project complete.');
+    const depositMilestone = new SubContractMilestone(subContract, SubContractMilestoneType.Deposit, totalPrice / 2, subContractMilestoneComment[SubContractMilestoneType.Deposit]);
+    const finalMilestone = new SubContractMilestone(subContract, SubContractMilestoneType.Final, totalPrice / 2, subContractMilestoneComment[SubContractMilestoneType.Final]);
     return this.subContractMilestoneRepository.save([depositMilestone, finalMilestone]);
   }
 
