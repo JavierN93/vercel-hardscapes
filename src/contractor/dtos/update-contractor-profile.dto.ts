@@ -1,9 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsArray, ValidateNested } from 'class-validator';
 
 import { HardscapingPropertyType } from '../../users/enums';
 import { ProjectAccessoryType } from '../../project/enums';
 import { MaterialType } from '../../idea-board/enums';
-import { UpdatePortfolioDto } from '../../portfolio/dtos/update-portfolio.dto';
+import { HardscapeCrewDto } from './hardscape-crew.dto';
 
 export class UpdateContractorProfileDto {
   @ApiProperty()
@@ -51,6 +53,21 @@ export class UpdateContractorProfileDto {
   @ApiProperty()
   timePerProject: string;
 
+  @ApiProperty()
+  excavationEquipmentComment: string;
+
+  @ApiProperty()
+  truckComment: string;
+
+  @ApiProperty()
+  compactionEquipmentComment: string;
+
+  @ApiProperty({ type: () => HardscapeCrewDto, isArray: true })
+  @Type(() => HardscapeCrewDto)
+  @IsArray()
+  @ValidateNested({ each: true })
+  hardscapeCrews: HardscapeCrewDto[];
+
   @ApiProperty({ required: false })
   instagramLink?: string;
 
@@ -62,7 +79,4 @@ export class UpdateContractorProfileDto {
 
   @ApiProperty({ required: false })
   otherSocialLink?: string;
-
-  @ApiProperty()
-  portfolios: UpdatePortfolioDto[];
 }

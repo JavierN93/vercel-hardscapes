@@ -1,8 +1,7 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 import { SoftDelete } from '../../common/core/soft-delete';
 import { PortfolioDto } from '../dtos/portfolio.dto';
-import { ContractorProfile } from '../../users/entities/contractor-profile.entity';
 
 @Entity('portfolio')
 export class Portfolio extends SoftDelete {
@@ -14,9 +13,6 @@ export class Portfolio extends SoftDelete {
 
   @Column({ type: 'text', array: true, default: '{}' })
   attachments: string[];
-
-  @ManyToOne(() => ContractorProfile, contractor => contractor.portfolios)
-  contractorProfile: ContractorProfile;
 
   toDto(): PortfolioDto {
     return {

@@ -87,7 +87,7 @@ export class UsersService {
   findUserById(id: string, findRemoved = false): Promise<User> {
     return this.usersRepository.findOne({
       withDeleted: findRemoved,
-      relations: ['customerProfile', 'consultantProfile', 'contractorProfile', 'contractorProfile.portfolios', 'patioPackage'],
+      relations: ['customerProfile', 'consultantProfile', 'contractorProfile', 'contractorProfile.hardscapeCrews', 'patioPackage'],
       where: { id },
     });
   }

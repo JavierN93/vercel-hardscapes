@@ -37,6 +37,8 @@ import { ContractorStatus } from '../users/enums';
 import { projectDefaultTakeCount } from '../common/constants/general.constants';
 import { UserRole } from '../common/enums/user-role.enum';
 import { SlackMessageType } from '../slack/enums/slack-message-type.enum';
+import { getFromDto } from '../common/utils/repository.util';
+import { HardscapeCrew } from '../users/entities/hardscape-crew.entity';
 
 @ApiTags('Contractor')
 @Controller('api')
@@ -146,10 +148,10 @@ export class ContractorController {
     user.longitude = payload.longitude;
 
     // update portfolio
-    const portfolios = await this.portfolioService.save(payload.portfolios);
+    const hardscapeCrews = await this.contractorService.addHardscapeCrews(payload.hardscapeCrews.map(hardscapeCrewDto => getFromDto<HardscapeCrew>(hardscapeCrewDto, new HardscapeCrew())));
 
     // update contractor profile
-    user.contractorProfile = await this.contractorService.saveContractorProfile(user, portfolios, payload);
+    user.contractorProfile = await this.contractorService.saveContractorProfile(user, hardscapeCrews, payload);
     await this.userService.updateUser(user);
     const admins = await this.userService.findSuperAdmins();
     await this.notificationService.contractorUpdatedProfileEvent(admins, user);

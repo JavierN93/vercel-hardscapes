@@ -52,3 +52,12 @@ export enum ContractorClass {
   A = 'A',
   B = 'B',
 }
+
+export enum ExperienceLevel {
+  Year1 = 'YEAR_1',
+  Year2 = 'YEAR_2',
+  Year3 = 'YEAR_3',
+  Year4 = 'YEAR_4',
+  Year5 = 'YEAR_5',
+  Year6 = 'YEAR_6',
+}
