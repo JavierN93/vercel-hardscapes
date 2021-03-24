@@ -34,7 +34,7 @@ export class DynamoDBTransport extends Transport {
         message: { S: JSON.stringify(info.message) },
       }
     };
-    this.ddb.putItem(params);
+    this.ddb.putItem(params, (err, data) => err && console.log('dynamodb put object error: ', err, data));
     callback();
   }
 }
