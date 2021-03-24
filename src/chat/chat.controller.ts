@@ -87,7 +87,7 @@ export class ChatController {
           const chat = await this.chatService.findChatById(chatId);
           const payload: SendMessageDto = {
             message: fromString(text),
-          }
+          };
           if (chat.project.customer.user.email === from) {
             await this.chatService.sendMessage(payload, chat, chat.project.customer.user);
             resolve(new SuccessResponse(true));

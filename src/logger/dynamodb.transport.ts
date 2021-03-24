@@ -1,7 +1,7 @@
 import * as aws from 'aws-sdk';
 import * as Transport  from 'winston-transport';
 import * as uuid from 'uuid';
-import * as Moment from 'moment';
+import * as moment from 'moment';
 
 interface Options extends Transport.TransportStreamOptions {
   region: string;
@@ -28,7 +28,7 @@ export class DynamoDBTransport extends Transport {
       TableName: this.tableName,
       Item: {
         id: { S: uuid.v4() },
-        timestamp: { S: Moment().format() },
+        timestamp: { S: moment().format() },
         level: { S: info.level },
         message: { S: JSON.stringify(info.message) },
       }
