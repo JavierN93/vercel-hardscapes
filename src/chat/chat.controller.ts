@@ -17,6 +17,8 @@ import { messageDefaultTakeCount } from '../common/constants/general.constants';
 import { SuccessResponse } from '../common/models/success-response';
 import { TotalUnreadDto } from './dtos/total-unread.dto';
 import { extractEmailFromString } from '../common/utils/string.util';
+import { LoggerService } from '../logger/logger.service';
+import { LogKey } from '../logger/enums';
 
 @ApiTags('Chat')
 @Controller('api/chat')
@@ -33,7 +35,8 @@ export class ChatController {
 
   constructor(
     private readonly chatService: ChatService,
-    private readonly projectService: ProjectService
+    private readonly projectService: ProjectService,
+    private readonly loggerService: LoggerService,
   ) {
   }
 
@@ -69,34 +72,35 @@ export class ChatController {
   @Post('email-reply')
   async replyFromEmail(@Request() req: any) {
     const form = new multiparty.Form();
-    const res = await new Promise((resolve, reject) => {
-      form.parse(req, (error, fields) => {
+    return new Promise(resolve => {
+      form.parse(req, async (error, fields) => {
         if (error) {
-          reject(error);
+          this.loggerService.error(LogKey.Messaging, error);
+          resolve(new SuccessResponse(false));
         }
         if (fields) {
-          resolve(fields);
+          const domain = `@chat-reply.${process.env.MAIL_DOMAIN}`;
+          const from = extractEmailFromString(fields['from'][0]);
+          const to = extractEmailFromString(fields['to'][0]);
+          const text = fields['html'][0];
+          const chatId = to.slice(0, to.length - domain.length);
+          const chat = await this.chatService.findChatById(chatId);
+          const payload: SendMessageDto = {
+            message: fromString(text),
+          }
+          if (chat.project.customer.user.email === from) {
+            await this.chatService.sendMessage(payload, chat, chat.project.customer.user);
+            resolve(new SuccessResponse(true));
+          }
+          if (chat.project.consultant.user.email === from) {
+            await this.chatService.sendMessage(payload, chat, chat.project.consultant.user);
+            resolve(new SuccessResponse(true));
+          }
+          this.loggerService.error(LogKey.Messaging, fields);
+          resolve(new SuccessResponse(false));
         }
       });
     });
-    const domain = `@chat-reply.${process.env.MAIL_DOMAIN}`;
-    const from = extractEmailFromString(res['from'][0]);
-    const to = extractEmailFromString(res['to'][0]);
-    const text = res['html'][0];
-    const chatId = to.slice(0, to.length - domain.length);
-    const chat = await this.chatService.findChatById(chatId);
-    const payload: SendMessageDto = {
-      message: fromString(text),
-    }
-    if (chat.project.customer.user.email === from) {
-      await this.chatService.sendMessage(payload, chat, chat.project.customer.user);
-      return new SuccessResponse(true);
-    } else if (chat.project.consultant.user.email === from) {
-      await this.chatService.sendMessage(payload, chat, chat.project.consultant.user);
-      return new SuccessResponse(true);
-    } else {
-      return new SuccessResponse(false);
-    }
   }
 
   @Get('unread')
