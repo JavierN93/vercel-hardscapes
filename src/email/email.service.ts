@@ -176,9 +176,9 @@ export class EmailService {
     const fromEmail = `${pendingMessage.chatId}@chat-reply.${process.env.MAIL_DOMAIN}`;
     let replyLink;
     if (pendingMessage.from === MessageFrom.FromCustomer || pendingMessage.from === MessageFrom.FromContractor) {
-      replyLink = `mailto:${fromEmail},${globalConfig.adminJoeEmail}`;
-    } else {
       replyLink = `mailto:${fromEmail}`;
+    } else {
+      replyLink = `mailto:${fromEmail},${globalConfig.adminJoeEmail}`;
     }
     return this.sendMail(EmailType.MessageReceived, pendingMessage.email, {
       projectName: pendingMessage.project,
