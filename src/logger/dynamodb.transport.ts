@@ -8,6 +8,7 @@ interface Options extends Transport.TransportStreamOptions {
   tableName: string;
 }
 
+// ref: https://github.com/winstonjs/winston#adding-custom-transports
 export class DynamoDBTransport extends Transport {
 
   private ddb;
