@@ -75,7 +75,7 @@ export class ChatController {
     return new Promise(resolve => {
       form.parse(req, async (error, fields) => {
         if (error) {
-          this.loggerService.error(LogKey.Messaging, error);
+          this.loggerService.error(LogKey.Messaging, { message: 'reply-email request parse error', ...error });
           resolve(new SuccessResponse(false));
         }
         if (fields) {
@@ -96,7 +96,7 @@ export class ChatController {
             await this.chatService.sendMessage(payload, chat, chat.project.consultant.user);
             resolve(new SuccessResponse(true));
           }
-          this.loggerService.error(LogKey.Messaging, fields);
+          this.loggerService.error(LogKey.Messaging, { message: 'unable to process the email-reply', ...fields });
           resolve(new SuccessResponse(false));
         }
       });
