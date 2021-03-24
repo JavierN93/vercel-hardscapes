@@ -1,4 +1,7 @@
+import { MessageFrom } from '../enums';
+
 export interface PendingMessage {
+  from: MessageFrom,
   message: string;
   createdAt: string;
   email: string;
