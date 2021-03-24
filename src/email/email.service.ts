@@ -27,6 +27,7 @@ import { MilestoneType } from '../payment/enums';
 import { UserRole } from '../common/enums/user-role.enum';
 import { SubContract } from '../project/sub-contract/entities/sub-contract.entity';
 import { globalConfig } from '../config';
+import { MessageFrom } from '../chat/enums';
 
 @Injectable()
 export class EmailService {
@@ -173,13 +174,19 @@ export class EmailService {
 
   async sendUnreadMessagesEmail(pendingMessage: PendingMessage): Promise<boolean> {
     const fromEmail = `${pendingMessage.chatId}@chat-reply.${process.env.MAIL_DOMAIN}`;
+    let replyLink;
+    if (pendingMessage.from === MessageFrom.FromCustomer || pendingMessage.from === MessageFrom.FromContractor) {
+      replyLink = `mailto:${fromEmail},${globalConfig.adminJoeEmail}`;
+    } else {
+      replyLink = `mailto:${fromEmail}`;
+    }
     return this.sendMail(EmailType.MessageReceived, pendingMessage.email, {
       projectName: pendingMessage.project,
       recipientName: pendingMessage.recipientName,
       senderName: pendingMessage.senderName,
       messageContent: pendingMessage.message,
       loginLink: `${process.env.PRODUCTION_HOST}/login`,
-      replyLink: `mailto:${fromEmail}`,
+      replyLink,
     }, null, `${globalConfig.companyName} <${fromEmail}>`);
   }
 

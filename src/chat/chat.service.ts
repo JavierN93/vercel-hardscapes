@@ -243,6 +243,7 @@ export class ChatService {
     const recipientName = MessageFrom.FromCustomer ? `${messages[0].consultant_user_firstName} ${messages[0].consultant_user_lastName}` : `${messages[0].customer_user_firstName} ${messages[0].customer_user_lastName}`;
     const senderName = MessageFrom.FromCustomer ? `${messages[0].customer_user_firstName} ${messages[0].customer_user_lastName}` : `${messages[0].consultant_user_firstName} ${messages[0].consultant_user_lastName}`;
     return {
+      from,
       message,
       createdAt,
       email,

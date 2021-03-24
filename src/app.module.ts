@@ -30,6 +30,7 @@ import { MarketingModule } from './marketing/marketing.module';
 import { CustomerVisitHistoryModule } from './customer-visit-history/customer-visit-history.module';
 import { LeadModule } from './lead/lead.module';
 import { ContractorModule } from './contractor/contractor.module';
+import { LoggerModule } from './logger/logger.module';
 import * as ormconfig from './ormconfig';
 
 @Module({
@@ -64,6 +65,7 @@ import * as ormconfig from './ormconfig';
     MarketingModule,
     CustomerVisitHistoryModule,
     ContractorModule,
+    LoggerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
